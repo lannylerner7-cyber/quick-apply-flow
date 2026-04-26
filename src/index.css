@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 221 39% 11%;
+    --background: 220 33% 98%;
+    --foreground: 226 58% 9%;
     --card: 0 0% 100%;
     --card-foreground: 221 39% 11%;
     --popover: 0 0% 100%;
@@ -20,7 +20,7 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
+    --border: 222 18% 86%;
     --input: 220 13% 91%;
     --ring: 243 75% 59%;
     --radius: 1rem;
@@ -46,8 +46,9 @@
   .retail-page {
     min-height: 100vh;
     background:
-      radial-gradient(circle at top left, hsl(var(--secondary) / 0.16), transparent 32rem),
-      radial-gradient(circle at 80% 10%, hsl(var(--primary) / 0.12), transparent 30rem),
+      linear-gradient(135deg, hsl(var(--background)) 0%, hsl(230 76% 97%) 46%, hsl(188 88% 96%) 100%),
+      radial-gradient(circle at top left, hsl(var(--secondary) / 0.24), transparent 32rem),
+      radial-gradient(circle at 80% 10%, hsl(var(--primary) / 0.22), transparent 30rem),
       hsl(var(--background));
     color: hsl(var(--foreground));
   }
@@ -87,6 +88,13 @@
     font-weight: 900;
     letter-spacing: 0;
     box-shadow: 0 14px 30px hsl(var(--primary) / 0.22);
+  }
+
+  .brand-logo {
+    width: 2.75rem;
+    height: 2.75rem;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 18px hsl(var(--primary) / 0.22));
   }
 
   .site-header nav {
@@ -176,6 +184,7 @@
     gap: clamp(2rem, 6vw, 5rem);
     align-items: center;
     padding: clamp(3rem, 7vw, 7rem) clamp(1rem, 5vw, 5rem) 3rem;
+    min-height: calc(100vh - 5rem);
   }
 
   .hero-copy h1,
@@ -185,6 +194,7 @@
     font-size: clamp(3rem, 8vw, 6.9rem);
     line-height: 0.92;
     letter-spacing: 0;
+    text-shadow: 0 18px 42px hsl(var(--primary) / 0.12);
   }
 
   .hero-copy > p:not(.eyebrow),
@@ -220,15 +230,15 @@
   .hero-panel,
   .form-card,
   .success-shell {
-    border: 1px solid hsl(var(--card) / 0.7);
+    border: 1px solid hsl(var(--card) / 0.78);
     border-radius: 1.5rem;
-    background: linear-gradient(145deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.66));
-    box-shadow: 0 30px 80px hsl(220 43% 11% / 0.12);
-    backdrop-filter: blur(24px);
+    background: linear-gradient(145deg, hsl(var(--card) / 0.96), hsl(var(--card) / 0.62));
+    box-shadow: 0 34px 90px hsl(226 58% 9% / 0.16), inset 0 1px 0 hsl(var(--card) / 0.88);
+    backdrop-filter: blur(28px);
   }
 
   .hero-panel { padding: 1.3rem; min-height: 31rem; }
-  .panel-topline { height: 13rem; border-radius: 1.15rem; background: linear-gradient(135deg, hsl(var(--primary) / 0.92), hsl(var(--secondary) / 0.8)); }
+  .panel-topline { height: 13rem; border-radius: 1.15rem; background: linear-gradient(135deg, hsl(var(--primary) / 0.98), hsl(var(--secondary) / 0.9)); box-shadow: inset 0 -40px 80px hsl(226 58% 9% / 0.18); }
   .earn-card { margin: -3.2rem 1rem 1rem; position: relative; display: grid; gap: 0.35rem; padding: 1.2rem; border-radius: 1rem; background: hsl(var(--card)); box-shadow: 0 20px 40px hsl(220 43% 11% / 0.12); }
   .earn-card span { color: hsl(var(--muted-foreground)); font-weight: 700; }
   .earn-card strong { font-size: 1.65rem; }
@@ -268,8 +278,8 @@
     padding: 1.2rem;
     box-shadow: 0 18px 45px hsl(220 43% 11% / 0.06);
   }
-  .logo-cloud article { display: flex; align-items: center; gap: 0.85rem; }
-  .logo-cloud article span { display: grid; place-items: center; width: 2.7rem; height: 2.7rem; border-radius: 0.8rem; background: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); font-weight: 900; }
+  .logo-cloud article { display: flex; align-items: center; gap: 0.85rem; min-height: 5.8rem; }
+  .logo-cloud article img { width: 3.35rem; height: 3.35rem; object-fit: contain; border-radius: 0.8rem; background: hsl(var(--card)); padding: 0.32rem; box-shadow: 0 10px 24px hsl(226 58% 9% / 0.08); }
   .benefit-card h3,
   .process-card h3 { margin: 0 0 0.55rem; font-size: 1.2rem; }
   .benefit-card p,
@@ -279,8 +289,11 @@
   .process-card span { color: hsl(var(--primary)); font-weight: 950; font-size: 2rem; }
 
   .watch-section { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 2rem; align-items: center; }
-  .video-panel { min-height: 21rem; display: grid; place-items: center; gap: 1rem; border-radius: 1.5rem; background: linear-gradient(135deg, hsl(221 39% 11%), hsl(var(--primary))); color: hsl(var(--primary-foreground)); box-shadow: 0 30px 70px hsl(var(--primary) / 0.22); }
-  .play-button { width: 5rem; height: 5rem; border-radius: 999px; background: hsl(var(--card)); clip-path: polygon(25% 15%, 25% 85%, 85% 50%); }
+  .video-panel { position: relative; min-height: 21rem; overflow: hidden; border-radius: 1.5rem; background: hsl(var(--foreground)); color: hsl(var(--primary-foreground)); box-shadow: 0 34px 85px hsl(var(--primary) / 0.28); }
+  .video-panel img,
+  .video-panel iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+  .video-panel img { opacity: 0.34; filter: saturate(1.2) contrast(1.05); }
+  .video-panel iframe { z-index: 1; }
 
   .final-cta { border-radius: 1.5rem; padding: 3rem; background: hsl(var(--foreground)); color: hsl(var(--primary-foreground)); }
   .final-cta p { margin-left: auto; margin-right: auto; color: hsl(var(--primary-foreground) / 0.75); }

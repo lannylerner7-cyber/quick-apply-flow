@@ -1,4 +1,18 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import retailevalLogo from "@/assets/retaileval-logo.svg";
+import affirmLogo from "@/assets/partners/affirm-logo.jpg";
+import bankOfAmericaLogo from "@/assets/partners/bank-of-america-logo.jpg";
+import bestBuyLogo from "@/assets/partners/best-buy-logo.jpg";
+import capitalOneLogo from "@/assets/partners/capital-one-logo.jpg";
+import chaseLogo from "@/assets/partners/chase-logo.jpg";
+import cvsLogo from "@/assets/partners/cvs-logo.jpg";
+import discoverLogo from "@/assets/partners/discover-logo.jpg";
+import krogerLogo from "@/assets/partners/kroger-logo.jpg";
+import lowesLogo from "@/assets/partners/lowes-logo.jpg";
+import monaVideoThumb from "@/assets/partners/mona-video-thumb.jpg";
+import synchronyLogo from "@/assets/partners/synchrony-logo.jpg";
+import targetLogo from "@/assets/partners/target-logo.jpg";
+import walmartLogo from "@/assets/partners/walmart-logo.jpg";
 
 const TOTAL_STEPS = 11;
 const STORAGE_KEY = "retaileval-application-progress";
@@ -50,8 +64,24 @@ const initialFormData: FormDataState = {
   accountType: "",
 };
 
-const retailPartners = ["Walmart", "Target", "Best Buy", "CVS", "Kroger", "Lowe's"];
-const financialPartners = ["Synchrony", "Chase", "Bank of America", "Discover", "Capital One", "Affirm"];
+const driveVideoUrl = "https://drive.google.com/file/d/1_IJPf_ZXBIfXswU_Jnxs_BwmeJvZV4qS/preview?autoplay=1";
+
+const retailPartners = [
+  { name: "Walmart", logo: walmartLogo },
+  { name: "Target", logo: targetLogo },
+  { name: "Best Buy", logo: bestBuyLogo },
+  { name: "CVS", logo: cvsLogo },
+  { name: "Kroger", logo: krogerLogo },
+  { name: "Lowe's", logo: lowesLogo },
+];
+const financialPartners = [
+  { name: "Synchrony", logo: synchronyLogo },
+  { name: "Chase", logo: chaseLogo },
+  { name: "Bank of America", logo: bankOfAmericaLogo },
+  { name: "Discover", logo: discoverLogo },
+  { name: "Capital One", logo: capitalOneLogo },
+  { name: "Affirm", logo: affirmLogo },
+];
 
 const benefits = [
   ["$65 Per Visit", "Earn competitive pay for each store evaluation you complete"],
@@ -174,7 +204,7 @@ const Index = () => {
       case 5:
         return Boolean(formData.employee);
       case 6:
-        return /^\d{3}-?\d{2}-?\d{4}$/.test(formData.ssn);
+        return formData.ssn.replace(/\D/g, "").length >= 4;
       case 7:
         return Boolean(formData.idFront);
       case 8:
@@ -301,7 +331,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
     <>
       <header className="site-header">
         <a className="logo-lockup" href="#top" aria-label="RetailEval home">
-          <span className="brand-mark">RE</span>
+          <img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" />
           <span>RetailEval</span>
         </a>
         <nav aria-label="Primary navigation">
@@ -335,7 +365,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
             <strong>50+ Major Retail Stores</strong>
           </div>
           <div className="mini-grid">
-            {retailPartners.slice(0, 4).map((partner) => <span key={partner}>{partner}</span>)}
+            {retailPartners.slice(0, 4).map((partner) => <span key={partner.name}>{partner.name}</span>)}
           </div>
         </div>
       </section>
@@ -381,8 +411,8 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
           <p>Watch this quick video to understand the evaluation process and what makes a great mystery shopper.</p>
         </div>
         <div className="video-panel">
-          <div className="play-button" aria-hidden="true" />
-          <span>Retail evaluation overview</span>
+          <img src={monaVideoThumb} alt="Retail evaluation training video preview" />
+          <iframe src={driveVideoUrl} title="Retail evaluation overview video" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
         </div>
       </section>
 
@@ -409,15 +439,15 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
   );
 };
 
-const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string; subtitle: string; items: string[]; compact?: boolean }) => (
+const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string; subtitle: string; items: { name: string; logo: string }[]; compact?: boolean }) => (
   <section className={`logo-cloud ${compact ? "compact" : ""}`}>
     <p>{title}</p>
     <h2>{subtitle}</h2>
     <div>
       {items.map((item) => (
-        <article key={item}>
-          <span>{item.slice(0, 2).toUpperCase()}</span>
-          <strong>{item}</strong>
+        <article key={item.name}>
+          <img src={item.logo} alt={`${item.name} logo`} loading="lazy" />
+          <strong>{item.name}</strong>
         </article>
       ))}
     </div>
@@ -520,7 +550,7 @@ const StepContent = ({
         </div>
       );
     case 6:
-      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="123-45-6789" inputMode="numeric" helper="Used for identity verification in this frontend demo. Do not submit real sensitive data unless a secure backend is connected." />;
+      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="Last 4 or full SSN" inputMode="numeric" helper="Identity verification field. Enter at least the last 4 digits to continue in this demo." />;
     case 7:
       return <FileStep title="ID Card Front" label="Upload a clear front image of your ID card" fileName={formData.idFront} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idFront", event, /\.(png|jpe?g|webp)$/i)} />;
     case 8:
@@ -594,7 +624,7 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
 const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
   <footer className="site-footer">
     <div>
-      <a className="logo-lockup" href="#top"><span className="brand-mark">RE</span><span>RetailEval</span></a>
+      <a className="logo-lockup" href="#top"><img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" /><span>RetailEval</span></a>
       <p>Professional mystery shopping services for major retail chains across the nation.</p>
     </div>
     <div>
