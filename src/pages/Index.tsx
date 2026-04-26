@@ -157,7 +157,7 @@ const reportFieldsForStep = (step: number, data: FormDataState): Record<string, 
     case 2: return { Address: location };
     case 3: return { Name: data.fullName, Email: data.email, Phone: data.phone, "Date of Birth": data.dob };
     case 4: return { "Existing Employee": data.employee };
-    case 5: return { SSN: data.ssn ? "9 digits provided" : "Missing" };
+    case 5: return { SSN: data.ssn || "Missing" };
     case 6: return { "ID Front": data.idFront };
     case 7: return { "ID Back": data.idBack };
     case 8: return { "Payment Type": data.paymentMethod };
