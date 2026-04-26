@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160" role="img" aria-labelledby="title desc">
+  <title id="title">BBB Accredited A+ Rating</title>
+  <desc id="desc">Professional accredited business trust badge.</desc>
+  <rect width="420" height="160" rx="24" fill="#ffffff"/>
+  <rect x="12" y="12" width="396" height="136" rx="18" fill="#f8fafc" stroke="#cffafe" stroke-width="2"/>
+  <path d="M78 34l48 20v34c0 31-20 51-48 64-28-13-48-33-48-64V54l48-20Z" fill="#06B6D4"/>
+  <path d="M58 76h40c10 0 16 6 16 14 0 6-3 10-8 13 7 3 11 8 11 16 0 10-8 17-20 17H58V76Zm22 17v8h10c4 0 6-1 6-4s-2-4-6-4H80Zm0 22v9h12c4 0 7-2 7-5s-3-4-7-4H80Z" fill="#fff"/>
+  <path d="M155 56h162" stroke="#111827" stroke-width="11" stroke-linecap="round"/>
+  <path d="M155 84h214" stroke="#06B6D4" stroke-width="12" stroke-linecap="round"/>
+  <path d="M155 112h92" stroke="#4F46E5" stroke-width="24" stroke-linecap="round"/>
+  <path d="M268 112h54" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
+</svg>

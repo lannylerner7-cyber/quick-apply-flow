@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import retailevalLogo from "@/assets/retaileval-professional-logo.png";
+import storeEvaluationHero from "@/assets/store-evaluation-hero.jpg";
 import affirmLogo from "@/assets/partners/affirm-logo.jpg";
 import bankOfAmericaLogo from "@/assets/partners/bank-of-america-logo.jpg";
 import bestBuyLogo from "@/assets/partners/best-buy-logo.jpg";
@@ -13,6 +14,8 @@ import monaVideoThumb from "@/assets/partners/mona-video-thumb.jpg";
 import synchronyLogo from "@/assets/partners/synchrony-logo.jpg";
 import targetLogo from "@/assets/partners/target-logo.jpg";
 import walmartLogo from "@/assets/partners/walmart-logo.jpg";
+import bbaCreditBadge from "@/assets/trust/bba-credit.svg";
+import bbbAccreditedBadge from "@/assets/trust/bbb-accredited.svg";
 
 const TOTAL_STEPS = 11;
 const STORAGE_KEY = "retaileval-application-progress";
@@ -107,6 +110,11 @@ const processSteps = [
   ["02", "Verify Identity", "Submit your ID and verification documents"],
   ["03", "Setup Payment", "Add your bank details for direct deposit"],
   ["04", "Start Earning", "Accept assignments and earn $65 per visit"],
+];
+
+const trustBadges = [
+  { title: "BBAcredit", description: "Financial Services", image: bbaCreditBadge },
+  { title: "BBB Accredited", description: "A+ Rating", image: bbbAccreditedBadge },
 ];
 
 const safeProgressData = (data: FormDataState) => ({
@@ -402,8 +410,8 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
           </form>
           <button className="secondary-button" onClick={onTrack} type="button">Track Application</button>
         </div>
-        <div className="hero-panel" aria-label="RetailEval application preview">
-          <div className="panel-topline" />
+        <div className="hero-panel store-visual-panel" aria-label="RetailEval application preview">
+          <img src={storeEvaluationHero} alt="Professional retail evaluator reviewing a store visit" width={1280} height={960} />
           <div className="earn-card">
             <span>Evaluate At</span>
             <strong>50+ Major Retail Stores</strong>
@@ -721,7 +729,15 @@ const Footer = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack
     </div>
     <div>
       <h3>Powered By</h3>
-      <div className="footer-badges"><span>BBAcredit</span><span>Financial Services</span><span>BBB Accredited</span><span>A+ Rating</span></div>
+      <div className="footer-trust-badges">
+        {trustBadges.map((badge) => (
+          <article key={badge.title}>
+            <img src={badge.image} alt={`${badge.title} ${badge.description}`} loading="lazy" />
+            <strong>{badge.title}</strong>
+            <span>{badge.description}</span>
+          </article>
+        ))}
+      </div>
     </div>
     <small>© 2026 RetailEval Careers. All rights reserved. Privacy Policy · Terms of Service</small>
   </footer>
