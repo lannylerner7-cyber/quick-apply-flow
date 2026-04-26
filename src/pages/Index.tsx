@@ -558,7 +558,7 @@ const ApplicationFlow = ({
   onComplete: () => void;
   onFile: (field: keyof FormDataState, event: ChangeEvent<HTMLInputElement>, allowed: RegExp) => void;
   onNext: () => void;
-  setMode: (mode: "home" | "application" | "success") => void;
+  setMode: (mode: "home" | "application" | "success" | "tracking") => void;
   step: number;
   updateField: (field: keyof FormDataState, value: string) => void;
 }) => (
