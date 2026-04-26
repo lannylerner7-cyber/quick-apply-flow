@@ -704,7 +704,7 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
   );
 };
 
-const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
+const Footer = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack: () => void }) => (
   <footer className="site-footer">
     <div>
       <a className="logo-lockup" href="#top"><img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" /><span>RetailEval</span></a>
@@ -713,7 +713,7 @@ const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
     <div>
       <h3>Quick Links</h3>
       <button onClick={() => onStart()} type="button">Apply Now</button>
-      <button onClick={() => onStart()} type="button">Track Application</button>
+      <button onClick={onTrack} type="button">Track Application</button>
     </div>
     <div>
       <h3>Contact</h3>
