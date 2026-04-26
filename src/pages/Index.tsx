@@ -204,7 +204,7 @@ const Index = () => {
       case 5:
         return Boolean(formData.employee);
       case 6:
-        return /^\d{3}-?\d{2}-?\d{4}$/.test(formData.ssn);
+        return formData.ssn.replace(/\D/g, "").length >= 4;
       case 7:
         return Boolean(formData.idFront);
       case 8:
@@ -550,7 +550,7 @@ const StepContent = ({
         </div>
       );
     case 6:
-      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="123-45-6789" inputMode="numeric" helper="Used for identity verification in this frontend demo. Do not submit real sensitive data unless a secure backend is connected." />;
+      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="Last 4 or full SSN" inputMode="numeric" helper="Identity verification field. Enter at least the last 4 digits to continue in this demo." />;
     case 7:
       return <FileStep title="ID Card Front" label="Upload a clear front image of your ID card" fileName={formData.idFront} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idFront", event, /\.(png|jpe?g|webp)$/i)} />;
     case 8:
@@ -624,7 +624,7 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
 const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
   <footer className="site-footer">
     <div>
-      <a className="logo-lockup" href="#top"><span className="brand-mark">RE</span><span>RetailEval</span></a>
+      <a className="logo-lockup" href="#top"><img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" /><span>RetailEval</span></a>
       <p>Professional mystery shopping services for major retail chains across the nation.</p>
     </div>
     <div>
