@@ -396,7 +396,7 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
         </form>
       </header>
 
-      <section className="hero-section" id="top">
+      <section className="hero-section hero-image-section" id="top" style={{ backgroundImage: `url(${storeEvaluationHero})` }}>
         <div className="hero-copy">
           <p className="eyebrow">Now Hiring Nationwide</p>
           <h1>Earn $65 Per Store Visit</h1>
@@ -409,16 +409,6 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
             </div>
           </form>
           <button className="secondary-button" onClick={onTrack} type="button">Track Application</button>
-        </div>
-        <div className="hero-panel store-visual-panel" aria-label="RetailEval application preview">
-          <img src={storeEvaluationHero} alt="Professional retail evaluator reviewing a store visit" width={1280} height={960} />
-          <div className="earn-card">
-            <span>Evaluate At</span>
-            <strong>50+ Major Retail Stores</strong>
-          </div>
-          <div className="mini-grid">
-            {retailPartners.slice(0, 4).map((partner) => <span key={partner.name}>{partner.name}</span>)}
-          </div>
         </div>
       </section>
 
