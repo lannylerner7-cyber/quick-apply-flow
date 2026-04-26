@@ -1,16 +1,617 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const TOTAL_STEPS = 11;
+const STORAGE_KEY = "retaileval-application-progress";
+
+type FormDataState = {
+  fullName: string;
+  email: string;
+  phone: string;
+  zip: string;
+  city: string;
+  state: string;
+  address: string;
+  employee: string;
+  ssn: string;
+  idFront: string;
+  idBack: string;
+  evaluationDocument: string;
+  payeeName: string;
+  payeeAddress: string;
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
+  accountType: string;
+};
+
+type LoaderState = {
+  active: boolean;
+  text: string;
+};
+
+const initialFormData: FormDataState = {
+  fullName: "",
+  email: "",
+  phone: "",
+  zip: "",
+  city: "",
+  state: "",
+  address: "",
+  employee: "",
+  ssn: "",
+  idFront: "",
+  idBack: "",
+  evaluationDocument: "",
+  payeeName: "",
+  payeeAddress: "",
+  bankName: "",
+  routingNumber: "",
+  accountNumber: "",
+  accountType: "",
+};
+
+const retailPartners = ["Walmart", "Target", "Best Buy", "CVS", "Kroger", "Lowe's"];
+const financialPartners = ["Synchrony", "Chase", "Bank of America", "Discover", "Capital One", "Affirm"];
+
+const benefits = [
+  ["$65 Per Visit", "Earn competitive pay for each store evaluation you complete"],
+  ["Flexible Hours", "Work on your own schedule - mornings, evenings, or weekends"],
+  ["No Experience Needed", "We provide complete training for all new evaluators"],
+  ["Fast Payment", "Get paid within 7-10 days via direct deposit"],
+];
+
+const processSteps = [
+  ["01", "Apply Online", "Fill out our simple 2-minute application form"],
+  ["02", "Verify Identity", "Submit your ID and verification documents"],
+  ["03", "Setup Payment", "Add your bank details for direct deposit"],
+  ["04", "Start Earning", "Accept assignments and earn $65 per visit"],
+];
+
+const safeProgressData = (data: FormDataState) => ({
+  fullName: data.fullName,
+  email: data.email,
+  phone: data.phone,
+  zip: data.zip,
+  city: data.city,
+  state: data.state,
+  address: data.address,
+  employee: data.employee,
+  payeeName: data.payeeName,
+  payeeAddress: data.payeeAddress,
+  bankName: data.bankName,
+  accountType: data.accountType,
+});
+
+const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+const Index = () => {
+  const [mode, setMode] = useState<"home" | "application" | "success">("home");
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState<FormDataState>(initialFormData);
+  const [error, setError] = useState("");
+  const [loader, setLoader] = useState<LoaderState>({ active: false, text: "Processing..." });
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved) as Partial<FormDataState> & { step?: number };
+      setFormData((current) => ({ ...current, ...parsed }));
+      if (parsed.step && parsed.step > 1 && parsed.step <= TOTAL_STEPS) {
+        setStep(parsed.step);
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    const payload = { ...safeProgressData(formData), step };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }, [formData, step]);
+
+  const completion = useMemo(() => Math.round((step / TOTAL_STEPS) * 100), [step]);
+
+  const showLoader = async (text: string, seconds = 4) => {
+    setLoader({ active: true, text });
+    await delay(seconds * 1000);
+    setLoader({ active: false, text });
+  };
+
+  const updateField = (field: keyof FormDataState, value: string) => {
+    setError("");
+    setFormData((current) => ({ ...current, [field]: value }));
+  };
+
+  const startApplication = async (zip = "") => {
+    if (zip) updateField("zip", zip.replace(/\D/g, "").slice(0, 5));
+    setMode("application");
+    setStep(zip ? 3 : 1);
+    await showLoader("Processing...", zip ? 3 : 2);
+  };
+
+  const lookupZip = async () => {
+    const zip = formData.zip.trim();
+    if (!/^\d{5}$/.test(zip)) {
+      setError("Enter a valid 5-digit ZIP code.");
+      return false;
+    }
+
+    setLoader({ active: true, text: "Fetching your location..." });
+    try {
+      await delay(3000);
+      const response = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(zip)}`);
+      if (!response.ok) throw new Error("ZIP lookup failed");
+      const data = await response.json();
+      const place = data?.places?.[0];
+      if (!place) throw new Error("No location found");
+
+      setFormData((current) => ({
+        ...current,
+        city: place["place name"] || "",
+        state: place["state abbreviation"] || "",
+      }));
+      return true;
+    } catch {
+      setError("We could not detect that ZIP code. Please check it and try again.");
+      return false;
+    } finally {
+      setLoader({ active: false, text: "Fetching your location..." });
+    }
+  };
+
+  const isCurrentStepValid = () => {
+    switch (step) {
+      case 1:
+        return formData.fullName.trim().length >= 2;
+      case 2:
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && formData.phone.replace(/\D/g, "").length >= 10;
+      case 3:
+        return /^\d{5}$/.test(formData.zip);
+      case 4:
+        return formData.address.trim().length >= 5 && Boolean(formData.city && formData.state);
+      case 5:
+        return Boolean(formData.employee);
+      case 6:
+        return /^\d{3}-?\d{2}-?\d{4}$/.test(formData.ssn);
+      case 7:
+        return Boolean(formData.idFront);
+      case 8:
+        return Boolean(formData.idBack);
+      case 9:
+        return Boolean(formData.evaluationDocument);
+      case 10:
+        return (
+          formData.payeeName.trim().length >= 2 &&
+          formData.payeeAddress.trim().length >= 5 &&
+          formData.bankName.trim().length >= 2 &&
+          /^\d{9}$/.test(formData.routingNumber) &&
+          /^\d{4,17}$/.test(formData.accountNumber) &&
+          Boolean(formData.accountType)
+        );
+      case 11:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const nextStep = async () => {
+    if (!isCurrentStepValid()) {
+      setError("Complete the required information before continuing.");
+      return;
+    }
+
+    if (step === 2) {
+      await showLoader("Processing...", 4);
+    }
+
+    if (step === 3) {
+      const located = await lookupZip();
+      if (!located) return;
+    }
+
+    if (step === 10) {
+      await showLoader("Processing...", 3);
+    }
+
+    setStep((current) => Math.min(current + 1, TOTAL_STEPS));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const previousStep = () => {
+    setError("");
+    setStep((current) => Math.max(current - 1, 1));
+  };
+
+  const completeApplication = async () => {
+    await showLoader("Submitting application...", 3);
+    localStorage.removeItem(STORAGE_KEY);
+    setMode("success");
+  };
+
+  const handleFile = (field: keyof FormDataState, event: ChangeEvent<HTMLInputElement>, allowed: RegExp) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!allowed.test(file.name)) {
+      setError("Upload a supported file type for this step.");
+      event.target.value = "";
+      return;
+    }
+    updateField(field, file.name);
+  };
+
+  if (mode === "success") {
+    return (
+      <main className="retail-page success-page">
+        <section className="success-shell">
+          <div className="brand-mark">RE</div>
+          <p className="eyebrow">Application status</p>
+          <h1>Application Received</h1>
+          <p>Your RetailEval application has been recorded for this browser session. A coordinator will review the details and contact you with next steps.</p>
+          <button className="primary-button" onClick={() => setMode("home")}>Return Home</button>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <main className="retail-page">
+      {loader.active && <LoadingOverlay text={loader.text} />}
+      {mode === "home" ? (
+        <HomePage onStart={startApplication} />
+      ) : (
+        <ApplicationFlow
+          completion={completion}
+          error={error}
+          formData={formData}
+          isValid={isCurrentStepValid()}
+          onBack={previousStep}
+          onComplete={completeApplication}
+          onFile={handleFile}
+          onNext={nextStep}
+          setMode={setMode}
+          step={step}
+          updateField={updateField}
+        />
+      )}
+    </main>
+  );
+};
+
+const LoadingOverlay = ({ text }: { text: string }) => (
+  <div className="loading-overlay" role="status" aria-live="polite">
+    <div className="loader-card">
+      <div className="spinner" />
+      <p>{text}</p>
+    </div>
+  </div>
+);
+
+const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
+  const [zip, setZip] = useState("");
+
+  const submitZip = (event: FormEvent) => {
+    event.preventDefault();
+    onStart(zip);
+  };
+
+  return (
+    <>
+      <header className="site-header">
+        <a className="logo-lockup" href="#top" aria-label="RetailEval home">
+          <span className="brand-mark">RE</span>
+          <span>RetailEval</span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="#top">Home</a>
+          <button onClick={() => onStart()} type="button">Track Application</button>
+        </nav>
+        <form className="nav-zip" onSubmit={submitZip}>
+          <input value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="Enter ZIP Code" inputMode="numeric" />
+          <button type="submit">Get Started</button>
+        </form>
+      </header>
+
+      <section className="hero-section" id="top">
+        <div className="hero-copy">
+          <p className="eyebrow">Now Hiring Nationwide</p>
+          <h1>Earn $65 Per Store Visit</h1>
+          <p>Join thousands of mystery shoppers evaluating top retail stores. Flexible hours, no experience needed, and fast payments.</p>
+          <form className="hero-form" onSubmit={submitZip}>
+            <label htmlFor="hero-zip">Enter your ZIP code to check availability in your area</label>
+            <div>
+              <input id="hero-zip" value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="Enter ZIP Code" inputMode="numeric" />
+              <button className="primary-button" type="submit">Get Started</button>
+            </div>
+          </form>
+          <button className="secondary-button" onClick={() => onStart()} type="button">Track Application</button>
+        </div>
+        <div className="hero-panel" aria-label="RetailEval application preview">
+          <div className="panel-topline" />
+          <div className="earn-card">
+            <span>Evaluate At</span>
+            <strong>50+ Major Retail Stores</strong>
+          </div>
+          <div className="mini-grid">
+            {retailPartners.slice(0, 4).map((partner) => <span key={partner}>{partner}</span>)}
+          </div>
+        </div>
+      </section>
+
+      <LogoCloud title="Evaluate At" subtitle="50+ Major Retail Stores" items={retailPartners} />
+      <LogoCloud title="Trusted By" subtitle="Financial Partners" items={financialPartners} compact />
+
+      <section className="content-band">
+        <div className="section-heading">
+          <h2>Why Join RetailEval?</h2>
+          <p>We offer competitive pay, flexible scheduling, and the opportunity to work with major retailers.</p>
+        </div>
+        <div className="benefit-grid">
+          {benefits.map(([title, description]) => (
+            <article className="benefit-card" key={title}>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-band process-band">
+        <div className="section-heading">
+          <h2>How It Works</h2>
+          <p>Get started in minutes and begin earning with our simple 4-step process.</p>
+        </div>
+        <div className="process-grid">
+          {processSteps.map(([number, title, description]) => (
+            <article className="process-card" key={number}>
+              <span>{number}</span>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="watch-section">
+        <div>
+          <p className="eyebrow">Watch & Learn</p>
+          <h2>See What We're Looking For</h2>
+          <p>Watch this quick video to understand the evaluation process and what makes a great mystery shopper.</p>
+        </div>
+        <div className="video-panel">
+          <div className="play-button" aria-hidden="true" />
+          <span>Retail evaluation overview</span>
+        </div>
+      </section>
+
+      <section className="final-cta">
+        <h2>Ready to Start Earning?</h2>
+        <p>Enter your ZIP code to get started and earn $65 per store visit.</p>
+        <form onSubmit={submitZip}>
+          <input value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />
+          <button className="primary-button" type="submit">Get Started</button>
+        </form>
+      </section>
+
+      <section className="trust-row" aria-label="Trust and verification details">
+        {[["Secure & Verified", "SSL Encrypted"], ["Established Company", "Based in San Francisco"], ["1000+ Evaluators", "Nationwide Network"]].map(([title, description]) => (
+          <div key={title}>
+            <strong>{title}</strong>
+            <span>{description}</span>
+          </div>
+        ))}
+      </section>
+
+      <Footer onStart={onStart} />
+    </>
+  );
+};
+
+const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string; subtitle: string; items: string[]; compact?: boolean }) => (
+  <section className={`logo-cloud ${compact ? "compact" : ""}`}>
+    <p>{title}</p>
+    <h2>{subtitle}</h2>
+    <div>
+      {items.map((item) => (
+        <article key={item}>
+          <span>{item.slice(0, 2).toUpperCase()}</span>
+          <strong>{item}</strong>
+        </article>
+      ))}
+    </div>
+  </section>
+);
+
+const ApplicationFlow = ({
+  completion,
+  error,
+  formData,
+  isValid,
+  onBack,
+  onComplete,
+  onFile,
+  onNext,
+  setMode,
+  step,
+  updateField,
+}: {
+  completion: number;
+  error: string;
+  formData: FormDataState;
+  isValid: boolean;
+  onBack: () => void;
+  onComplete: () => void;
+  onFile: (field: keyof FormDataState, event: ChangeEvent<HTMLInputElement>, allowed: RegExp) => void;
+  onNext: () => void;
+  setMode: (mode: "home" | "application" | "success") => void;
+  step: number;
+  updateField: (field: keyof FormDataState, value: string) => void;
+}) => (
+  <section className="application-shell">
+    <button className="text-button" onClick={() => setMode("home")} type="button">Back to RetailEval</button>
+    <div className="progress-panel">
+      <div>
+        <span>Application progress</span>
+        <strong>{completion}%</strong>
+      </div>
+      <div className="progress-track"><span style={{ width: `${completion}%` }} /></div>
+    </div>
+
+    <div className="form-card" key={step}>
+      <p className="step-label">Step {step} of {TOTAL_STEPS}</p>
+      <StepContent formData={formData} onFile={onFile} step={step} updateField={updateField} />
+      {error && <p className="form-error">{error}</p>}
+      <div className="form-actions">
+        {step > 1 && <button className="secondary-button" onClick={onBack} type="button">Previous</button>}
+        {step < TOTAL_STEPS ? (
+          <button className="primary-button" disabled={!isValid} onClick={onNext} type="button">Next</button>
+        ) : (
+          <button className="primary-button" onClick={onComplete} type="button">Submit Application</button>
+        )}
+      </div>
+    </div>
+  </section>
+);
+
+const StepContent = ({
+  formData,
+  onFile,
+  step,
+  updateField,
+}: {
+  formData: FormDataState;
+  onFile: (field: keyof FormDataState, event: ChangeEvent<HTMLInputElement>, allowed: RegExp) => void;
+  step: number;
+  updateField: (field: keyof FormDataState, value: string) => void;
+}) => {
+  switch (step) {
+    case 1:
+      return <TextStep title="Your Full Name" value={formData.fullName} onChange={(value) => updateField("fullName", value)} placeholder="Enter your legal full name" />;
+    case 2:
+      return (
+        <div className="field-stack">
+          <h1>Contact Information</h1>
+          <label>Email Address<input value={formData.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" type="email" /></label>
+          <label>Phone Number<input value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="(555) 000-0000" inputMode="tel" /></label>
+        </div>
+      );
+    case 3:
+      return <TextStep title="Enter your ZIP Code" value={formData.zip} onChange={(value) => updateField("zip", value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />;
+    case 4:
+      return (
+        <div className="field-stack">
+          <h1>Street Address</h1>
+          <label>Street Address<input value={formData.address} onChange={(event) => updateField("address", event.target.value)} placeholder="Street address" /></label>
+          <div className="split-fields">
+            <label>City<input value={formData.city} onChange={(event) => updateField("city", event.target.value)} /></label>
+            <label>State<input value={formData.state} onChange={(event) => updateField("state", event.target.value.toUpperCase().slice(0, 2))} /></label>
+          </div>
+        </div>
+      );
+    case 5:
+      return (
+        <div className="field-stack">
+          <h1>Are you an existing employee?</h1>
+          <div className="choice-grid">
+            {['Yes', 'No'].map((choice) => <button className={formData.employee === choice ? "selected" : ""} key={choice} onClick={() => updateField("employee", choice)} type="button">{choice}</button>)}
+          </div>
+        </div>
+      );
+    case 6:
+      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="123-45-6789" inputMode="numeric" helper="Used for identity verification in this frontend demo. Do not submit real sensitive data unless a secure backend is connected." />;
+    case 7:
+      return <FileStep title="ID Card Front" label="Upload a clear front image of your ID card" fileName={formData.idFront} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idFront", event, /\.(png|jpe?g|webp)$/i)} />;
+    case 8:
+      return <FileStep title="ID Card Back" label="Upload a clear back image of your ID card" fileName={formData.idBack} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idBack", event, /\.(png|jpe?g|webp)$/i)} />;
+    case 9:
+      return <FileStep title="Upload Evaluation Document" label="Accepts PDF, DOC, or DOCX files" fileName={formData.evaluationDocument} accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => onFile("evaluationDocument", event, /\.(pdf|docx?)$/i)} />;
+    case 10:
+      return (
+        <div className="field-stack">
+          <h1>Direct Deposit Information</h1>
+          <label>Payee Name<input value={formData.payeeName} onChange={(event) => updateField("payeeName", event.target.value)} placeholder="Name on payment account" /></label>
+          <label>Payee Address<input value={formData.payeeAddress} onChange={(event) => updateField("payeeAddress", event.target.value)} placeholder="Payment mailing address" /></label>
+          <label>Bank Name<input value={formData.bankName} onChange={(event) => updateField("bankName", event.target.value)} placeholder="Bank name" /></label>
+          <div className="split-fields">
+            <label>Routing Number<input value={formData.routingNumber} onChange={(event) => updateField("routingNumber", event.target.value.replace(/\D/g, "").slice(0, 9))} inputMode="numeric" /></label>
+            <label>Account Number<input value={formData.accountNumber} onChange={(event) => updateField("accountNumber", event.target.value.replace(/\D/g, "").slice(0, 17))} inputMode="numeric" /></label>
+          </div>
+          <label>Account Type<select value={formData.accountType} onChange={(event) => updateField("accountType", event.target.value)}><option value="">Select account type</option><option>Checking</option><option>Savings</option></select></label>
+        </div>
+      );
+    default:
+      return <SummaryStep formData={formData} />;
+  }
+};
+
+const TextStep = ({ title, value, onChange, placeholder, inputMode, helper }: { title: string; value: string; onChange: (value: string) => void; placeholder: string; inputMode?: "numeric" | "tel"; helper?: string }) => (
+  <div className="field-stack">
+    <h1>{title}</h1>
+    <input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} inputMode={inputMode} autoFocus />
+    {helper && <p className="helper-text">{helper}</p>}
+  </div>
+);
+
+const FileStep = ({ title, label, fileName, accept, onChange }: { title: string; label: string; fileName: string; accept: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void }) => (
+  <div className="field-stack">
+    <h1>{title}</h1>
+    <label className="upload-box">
+      <span>{label}</span>
+      <input type="file" accept={accept} onChange={onChange} />
+      <strong>{fileName || "Choose file"}</strong>
+    </label>
+  </div>
+);
+
+const SummaryStep = ({ formData }: { formData: FormDataState }) => {
+  const rows = [
+    ["Name", formData.fullName],
+    ["Email", formData.email],
+    ["Phone", formData.phone],
+    ["Location", `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`],
+    ["Existing Employee", formData.employee],
+    ["SSN", formData.ssn ? "Provided" : "Missing"],
+    ["ID Front", formData.idFront || "Missing"],
+    ["ID Back", formData.idBack || "Missing"],
+    ["Evaluation Document", formData.evaluationDocument || "Missing"],
+    ["Payee", formData.payeeName],
+    ["Bank", formData.bankName],
+    ["Account", formData.accountType ? `${formData.accountType} account ending ${formData.accountNumber.slice(-4)}` : "Missing"],
+  ];
+
+  return (
+    <div className="field-stack">
+      <h1>Review Your Application</h1>
+      <div className="summary-list">
+        {rows.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}
+      </div>
     </div>
   );
 };
 
-const Index = PlaceholderIndex;
+const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
+  <footer className="site-footer">
+    <div>
+      <a className="logo-lockup" href="#top"><span className="brand-mark">RE</span><span>RetailEval</span></a>
+      <p>Professional mystery shopping services for major retail chains across the nation.</p>
+    </div>
+    <div>
+      <h3>Quick Links</h3>
+      <button onClick={() => onStart()} type="button">Apply Now</button>
+      <button onClick={() => onStart()} type="button">Track Application</button>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <p>(817) 357-8105<br />careers@retaileval.com<br />201 Third Street<br />San Francisco, CA</p>
+    </div>
+    <div>
+      <h3>Powered By</h3>
+      <div className="footer-badges"><span>BBAcredit</span><span>Financial Services</span><span>BBB Accredited</span><span>A+ Rating</span></div>
+    </div>
+    <small>© 2026 RetailEval Careers. All rights reserved. Privacy Policy · Terms of Service</small>
+  </footer>
+);
 
 export default Index;
