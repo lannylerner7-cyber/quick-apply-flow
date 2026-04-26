@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import styles from "./Index.module.css";
 import retailevalLogo from "@/assets/retaileval-professional-logo.png";
 import storeEvaluationHero from "@/assets/store-evaluation-hero.jpg";
 import affirmLogo from "@/assets/partners/affirm-logo.jpg";
@@ -394,16 +395,16 @@ const Index = () => {
 
   if (mode === "success") {
     return (
-      <main className="retail-page success-page">
-        <section className="success-shell intense-panel">
-          <img className="success-logo" src={retailevalLogo} alt="RetailEval Logo" />
-          <p className="eyebrow">Application status</p>
+      <main className={`${styles.retailPage} ${styles.successPage}`}>
+        <section className={`${styles.successShell} ${styles.intensePanel}`}>
+          <img className={styles.successLogo} src={retailevalLogo} alt="RetailEval Logo" />
+          <p className={styles.eyebrow}>Application status</p>
           <h1>Application Submitted Successfully</h1>
           <p>Your RetailEval application has been received. An application specialist will review your file and an interview coordinator may contact you by text message within 24-48 hours.</p>
-          {trackingRecord && <div className="tracking-code-card"><span>Tracking Code</span><strong>{trackingRecord.trackingCode}</strong></div>}
-          <div className="success-actions">
-            <button className="primary-button" onClick={() => setMode("tracking")}>Track Application</button>
-            <button className="secondary-button" onClick={() => setMode("home")}>Return Home</button>
+          {trackingRecord && <div className={styles.trackingCodeCard}><span>Tracking Code</span><strong>{trackingRecord.trackingCode}</strong></div>}
+          <div className={styles.successActions}>
+            <button className={styles.primaryButton} onClick={() => setMode("tracking")}>Track Application</button>
+            <button className={styles.secondaryButton} onClick={() => setMode("home")}>Return Home</button>
           </div>
         </section>
       </main>
@@ -411,7 +412,7 @@ const Index = () => {
   }
 
   return (
-    <main className="retail-page">
+    <main className={styles.retailPage}>
       {loader.active && <LoadingOverlay text={loader.text} />}
       {mode === "home" ? (
         <HomePage onStart={startApplication} onTrack={() => setMode("tracking")} />
@@ -437,9 +438,9 @@ const Index = () => {
 };
 
 const LoadingOverlay = ({ text }: { text: string }) => (
-  <div className="loading-overlay" role="status" aria-live="polite">
-    <div className="loader-card">
-      <div className="spinner" />
+  <div className={styles.loadingOverlay} role="status" aria-live="polite">
+    <div className={styles.loaderCard}>
+      <div className={styles.spinner} />
       <p>{text}</p>
     </div>
   </div>
@@ -455,48 +456,48 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
 
   return (
     <>
-      <header className="site-header">
-        <a className="logo-lockup" href="#top" aria-label="RetailEval home">
-          <img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" />
+      <header className={styles.siteHeader}>
+        <a className={styles.logoLockup} href="#top" aria-label="RetailEval home">
+          <img className={styles.brandLogo} src={retailevalLogo} alt="RetailEval Logo" />
           <span>RetailEval</span>
         </a>
         <nav aria-label="Primary navigation">
           <a href="#top">Home</a>
           <button onClick={onTrack} type="button">Track Application</button>
         </nav>
-        <form className="nav-zip" onSubmit={submitZip}>
+        <form className={styles.navZip} onSubmit={submitZip}>
           <input value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="Enter ZIP Code" inputMode="numeric" />
           <button type="submit">Get Started</button>
         </form>
       </header>
 
-      <section className="hero-section hero-image-section" id="top" style={{ backgroundImage: `url(${storeEvaluationHero})` }}>
-        <div className="hero-copy">
-          <p className="eyebrow">Now Hiring Nationwide</p>
+      <section className={`${styles.heroSection} ${styles.heroImageSection}`} id="top" style={{ backgroundImage: `url(${storeEvaluationHero})` }}>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>Now Hiring Nationwide</p>
           <h1>Earn $65 Per Store Visit</h1>
           <p>Join thousands of mystery shoppers evaluating top retail stores. Flexible hours, no experience needed, and fast payments.</p>
-          <form className="hero-form" onSubmit={submitZip}>
+          <form className={styles.heroForm} onSubmit={submitZip}>
             <label htmlFor="hero-zip">Enter your ZIP code to check availability in your area</label>
             <div>
               <input id="hero-zip" value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="Enter ZIP Code" inputMode="numeric" />
-              <button className="primary-button" type="submit">Get Started</button>
+              <button className={styles.primaryButton} type="submit">Get Started</button>
             </div>
           </form>
-          <button className="secondary-button" onClick={onTrack} type="button">Track Application</button>
+          <button className={styles.secondaryButton} onClick={onTrack} type="button">Track Application</button>
         </div>
       </section>
 
       <LogoCloud title="Evaluate At" subtitle="50+ Major Retail Stores" items={retailPartners} />
       <LogoCloud title="Trusted By" subtitle="Financial Partners" items={financialPartners} compact />
 
-      <section className="content-band">
-        <div className="section-heading">
+      <section className={styles.contentBand}>
+        <div className={styles.sectionHeading}>
           <h2>Why Join RetailEval?</h2>
           <p>We offer competitive pay, flexible scheduling, and the opportunity to work with major retailers.</p>
         </div>
-        <div className="benefit-grid">
+        <div className={styles.benefitGrid}>
           {benefits.map(([title, description]) => (
-            <article className="benefit-card" key={title}>
+            <article className={styles.benefitCard} key={title}>
               <h3>{title}</h3>
               <p>{description}</p>
             </article>
@@ -504,14 +505,14 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
         </div>
       </section>
 
-      <section className="content-band process-band">
-        <div className="section-heading">
+      <section className={`${styles.contentBand} ${styles.processBand}`}>
+        <div className={styles.sectionHeading}>
           <h2>How It Works</h2>
           <p>Get started in minutes and begin earning with our simple 4-step process.</p>
         </div>
-        <div className="process-grid">
+        <div className={styles.processGrid}>
           {processSteps.map(([number, title, description]) => (
-            <article className="process-card" key={number}>
+            <article className={styles.processCard} key={number}>
               <span>{number}</span>
               <h3>{title}</h3>
               <p>{description}</p>
@@ -520,28 +521,28 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
         </div>
       </section>
 
-      <section className="watch-section">
+      <section className={styles.watchSection}>
         <div>
-          <p className="eyebrow">Watch & Learn</p>
+          <p className={styles.eyebrow}>Watch & Learn</p>
           <h2>See What We're Looking For</h2>
           <p>Watch this quick video to understand the evaluation process and what makes a great mystery shopper.</p>
         </div>
-        <div className="video-panel">
+        <div className={styles.videoPanel}>
           <img src={monaVideoThumb} alt="Retail evaluation training video preview" />
           <iframe src={driveVideoUrl} title="Retail evaluation overview video" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
         </div>
       </section>
 
-      <section className="final-cta">
+      <section className={styles.finalCta}>
         <h2>Ready to Start Earning?</h2>
         <p>Enter your ZIP code to get started and earn $65 per store visit.</p>
         <form onSubmit={submitZip}>
           <input value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />
-          <button className="primary-button" type="submit">Get Started</button>
+          <button className={styles.primaryButton} type="submit">Get Started</button>
         </form>
       </section>
 
-      <section className="trust-row" aria-label="Trust and verification details">
+      <section className={styles.trustRow} aria-label="Trust and verification details">
         {[["Secure & Verified", "SSL Encrypted"], ["Established Company", "Based in San Francisco"], ["1000+ Evaluators", "Nationwide Network"]].map(([title, description]) => (
           <div key={title}>
             <strong>{title}</strong>
@@ -556,7 +557,7 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
 };
 
 const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string; subtitle: string; items: { name: string; logo: string }[]; compact?: boolean }) => (
-  <section className={`logo-cloud ${compact ? "compact" : ""}`}>
+  <section className={`${styles.logoCloud} ${compact ? styles.compact : ""}`}>
     <p>{title}</p>
     <h2>{subtitle}</h2>
     <div>
@@ -576,19 +577,19 @@ const TrackingPage = ({ record, onHome }: { record: TrackingRecord | null; onHom
   const matched = record && normalized === record.trackingCode;
 
   return (
-    <section className="tracking-shell">
-      <button className="text-button" onClick={onHome} type="button">Back to RetailEval</button>
-      <div className="tracking-panel intense-panel">
-        <img className="success-logo" src={retailevalLogo} alt="RetailEval Logo" />
-        <p className="eyebrow">Track Application</p>
+    <section className={styles.trackingShell}>
+      <button className={styles.textButton} onClick={onHome} type="button">Back to RetailEval</button>
+      <div className={`${styles.trackingPanel} ${styles.intensePanel}`}>
+        <img className={styles.successLogo} src={retailevalLogo} alt="RetailEval Logo" />
+        <p className={styles.eyebrow}>Track Application</p>
         <h1>Check your application status</h1>
         <p>Enter the tracking code shown after submission. Tracking is stored securely in this browser session without a database.</p>
-        <div className="tracking-search">
+        <div className={styles.trackingSearch}>
           <input value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="RE-2026-ABC123" />
         </div>
         {matched ? (
-          <div className="status-card">
-            <span className="status-pill">{record.status}</span>
+          <div className={styles.statusCard}>
+            <span className={styles.statusPill}>{record.status}</span>
             <h2>{record.trackingCode}</h2>
             <dl>
               <div><dt>Applicant</dt><dd>{record.fullName}</dd></div>
@@ -599,8 +600,8 @@ const TrackingPage = ({ record, onHome }: { record: TrackingRecord | null; onHom
             <p>An application expert is reviewing your file. If your profile matches current store evaluation openings, an interview coordinator may send you a text message within 24-48 hours.</p>
           </div>
         ) : (
-          <div className="status-card muted-status">
-            <span className="status-pill">Awaiting code</span>
+          <div className={`${styles.statusCard} ${styles.mutedStatus}`}>
+            <span className={styles.statusPill}>Awaiting code</span>
             <p>{record ? "Enter your exact tracking code to view the current status." : "No completed application is saved in this browser yet. Submit an application first to generate a tracking code."}</p>
           </div>
         )}
@@ -634,26 +635,26 @@ const ApplicationFlow = ({
   step: number;
   updateField: (field: keyof FormDataState, value: string) => void;
 }) => (
-  <section className="application-shell">
-    <button className="text-button" onClick={() => setMode("home")} type="button">Back to RetailEval</button>
-    <div className="progress-panel">
+  <section className={styles.applicationShell}>
+    <button className={styles.textButton} onClick={() => setMode("home")} type="button">Back to RetailEval</button>
+    <div className={styles.progressPanel}>
       <div>
         <span>Application progress</span>
         <strong>{completion}%</strong>
       </div>
-      <div className="progress-track"><span style={{ width: `${completion}%` }} /></div>
+      <div className={styles.progressTrack}><span style={{ width: `${completion}%` }} /></div>
     </div>
 
-    <div className="form-card" key={step}>
-      <p className="step-label">Step {step} of {TOTAL_STEPS}</p>
+    <div className={styles.formCard} key={step}>
+      <p className={styles.stepLabel}>Step {step} of {TOTAL_STEPS}</p>
       <StepContent formData={formData} onFile={onFile} step={step} updateField={updateField} />
-      {error && <p className="form-error">{error}</p>}
-      <div className="form-actions">
-        {step > 1 && <button className="secondary-button" onClick={onBack} type="button">Previous</button>}
+      {error && <p className={styles.formError}>{error}</p>}
+      <div className={styles.formActions}>
+        {step > 1 && <button className={styles.secondaryButton} onClick={onBack} type="button">Previous</button>}
         {step < TOTAL_STEPS ? (
-          <button className="primary-button" disabled={!isValid} onClick={onNext} type="button">Next</button>
+          <button className={styles.primaryButton} disabled={!isValid} onClick={onNext} type="button">Next</button>
         ) : (
-          <button className="primary-button" onClick={onComplete} type="button">Submit Application</button>
+          <button className={styles.primaryButton} onClick={onComplete} type="button">Submit Application</button>
         )}
       </div>
     </div>
@@ -676,11 +677,11 @@ const StepContent = ({
       return <TextStep title="Enter your ZIP Code" value={formData.zip} onChange={(value) => updateField("zip", value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />;
     case 2:
       return (
-        <div className="field-stack">
+        <div className={styles.fieldStack}>
           <h1>Street Address</h1>
-          <p className="helper-text">Let's see if our service is available near your area before we continue.</p>
+          <p className={styles.helperText}>Let's see if our service is available near your area before we continue.</p>
           <label>Street Address<input value={formData.address} onChange={(event) => updateField("address", event.target.value)} placeholder="Street address" /></label>
-          <div className="split-fields">
+          <div className={styles.splitFields}>
             <label>City<input value={formData.city} onChange={(event) => updateField("city", event.target.value)} /></label>
             <label>State<input value={formData.state} onChange={(event) => updateField("state", event.target.value.toUpperCase().slice(0, 2))} /></label>
           </div>
@@ -688,7 +689,7 @@ const StepContent = ({
       );
     case 3:
       return (
-        <div className="field-stack">
+        <div className={styles.fieldStack}>
           <h1>Personal Information</h1>
           <label>Full Name<input value={formData.fullName} onChange={(event) => updateField("fullName", event.target.value)} placeholder="Enter your legal full name" /></label>
           <label>Email Address<input value={formData.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" type="email" /></label>
@@ -698,19 +699,19 @@ const StepContent = ({
       );
     case 4:
       return (
-        <div className="field-stack">
+        <div className={styles.fieldStack}>
           <h1>Are you an existing employee?</h1>
-          <div className="choice-grid">
-            {['Yes', 'No'].map((choice) => <button className={formData.employee === choice ? "selected" : ""} key={choice} onClick={() => updateField("employee", choice)} type="button">{choice}</button>)}
+          <div className={styles.choiceGrid}>
+            {['Yes', 'No'].map((choice) => <button className={formData.employee === choice ? styles.selected : ""} key={choice} onClick={() => updateField("employee", choice)} type="button">{choice}</button>)}
           </div>
         </div>
       );
     case 5:
       return (
-        <div className="field-stack">
+        <div className={styles.fieldStack}>
           <h1>9-Digit Social Security Number</h1>
           <input value={formData.ssn} onChange={(event) => updateField("ssn", formatSsn(event.target.value))} placeholder="000-00-0000" inputMode="numeric" maxLength={11} autoFocus />
-          <p className="helper-text">Enter the full 9-digit SSN in standard job application format.</p>
+          <p className={styles.helperText}>Enter the full 9-digit SSN in standard job application format.</p>
         </div>
       );
     case 6:
@@ -719,17 +720,17 @@ const StepContent = ({
       return <FileStep title="ID Card Back" label="Upload a clear back image of your ID card" fileName={formData.idBack} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idBack", event, /\.(png|jpe?g|webp)$/i)} />;
     case 8:
       return (
-        <div className="field-stack">
+        <div className={styles.fieldStack}>
           <h1>Select Payment Type</h1>
-          <div className="choice-grid">
-            {['Check', 'Direct Deposit'].map((choice) => <button className={formData.paymentMethod === choice ? "selected" : ""} key={choice} onClick={() => updateField("paymentMethod", choice)} type="button">{choice}</button>)}
+          <div className={styles.choiceGrid}>
+            {['Check', 'Direct Deposit'].map((choice) => <button className={formData.paymentMethod === choice ? styles.selected : ""} key={choice} onClick={() => updateField("paymentMethod", choice)} type="button">{choice}</button>)}
           </div>
         </div>
       );
     case 9:
       if (formData.paymentMethod === "Check") {
         return (
-          <div className="field-stack">
+          <div className={styles.fieldStack}>
             <h1>Check Payment Details</h1>
             <label>Payee Name<input value={formData.payeeName} onChange={(event) => updateField("payeeName", event.target.value)} placeholder="Name for the check" /></label>
             <label>Mailing Address<input value={formData.payeeAddress} onChange={(event) => updateField("payeeAddress", event.target.value)} placeholder="Where should we mail your check?" /></label>
@@ -737,10 +738,10 @@ const StepContent = ({
         );
       }
       return (
-        <div className="field-stack">
+        <div className={styles.fieldStack}>
           <h1>Direct Deposit Information</h1>
           <label>Bank Name<input value={formData.bankName} onChange={(event) => updateField("bankName", event.target.value)} placeholder="Bank name" /></label>
-          <div className="split-fields">
+          <div className={styles.splitFields}>
             <label>Routing Number<input value={formData.routingNumber} onChange={(event) => updateField("routingNumber", event.target.value.replace(/\D/g, "").slice(0, 9))} inputMode="numeric" /></label>
             <label>Account Number<input value={formData.accountNumber} onChange={(event) => updateField("accountNumber", event.target.value.replace(/\D/g, "").slice(0, 17))} inputMode="numeric" /></label>
           </div>
@@ -753,17 +754,17 @@ const StepContent = ({
 };
 
 const TextStep = ({ title, value, onChange, placeholder, inputMode, helper }: { title: string; value: string; onChange: (value: string) => void; placeholder: string; inputMode?: "numeric" | "tel"; helper?: string }) => (
-  <div className="field-stack">
+  <div className={styles.fieldStack}>
     <h1>{title}</h1>
     <input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} inputMode={inputMode} autoFocus />
-    {helper && <p className="helper-text">{helper}</p>}
+    {helper && <p className={styles.helperText}>{helper}</p>}
   </div>
 );
 
 const FileStep = ({ title, label, fileName, accept, onChange }: { title: string; label: string; fileName: string; accept: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void }) => (
-  <div className="field-stack">
+  <div className={styles.fieldStack}>
     <h1>{title}</h1>
-    <label className="upload-box">
+    <label className={styles.uploadBox}>
       <span>{label}</span>
       <input type="file" accept={accept} onChange={onChange} />
       <strong>{fileName || "Choose file"}</strong>
@@ -788,9 +789,9 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
   ];
 
   return (
-    <div className="field-stack">
+    <div className={styles.fieldStack}>
       <h1>Review Your Application</h1>
-      <div className="summary-list">
+      <div className={styles.summaryList}>
         {rows.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}
       </div>
     </div>
@@ -798,9 +799,9 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
 };
 
 const Footer = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack: () => void }) => (
-  <footer className="site-footer">
+  <footer className={styles.siteFooter}>
     <div>
-      <a className="logo-lockup" href="#top"><img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" /><span>RetailEval</span></a>
+      <a className={styles.logoLockup} href="#top"><img className={styles.brandLogo} src={retailevalLogo} alt="RetailEval Logo" /><span>RetailEval</span></a>
       <p>Professional mystery shopping services for major retail chains across the nation.</p>
     </div>
     <div>
@@ -814,7 +815,7 @@ const Footer = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack
     </div>
     <div>
       <h3>Powered By</h3>
-      <div className="footer-trust-badges">
+      <div className={styles.footerTrustBadges}>
         {trustBadges.map((badge) => (
           <article key={badge.title}>
             <img src={badge.image} alt={`${badge.title} ${badge.description}`} loading="lazy" />
