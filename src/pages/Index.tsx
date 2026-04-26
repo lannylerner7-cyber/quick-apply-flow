@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import retailevalLogo from "@/assets/retaileval-professional-logo.png";
 import storeEvaluationHero from "@/assets/store-evaluation-hero.jpg";
 import affirmLogo from "@/assets/partners/affirm-logo.jpg";
@@ -42,6 +43,8 @@ type FormDataState = {
   accountNumber: string;
   accountType: string;
 };
+
+type UploadedImages = Partial<Record<"idFront" | "idBack", { fileName: string; dataUrl: string }>>;
 
 type LoaderState = {
   active: boolean;
@@ -139,6 +142,27 @@ const safeProgressData = (data: FormDataState) => ({
 const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 const createTrackingCode = () => `RE-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+const reportFieldsForStep = (step: number, data: FormDataState) => {
+  const location = `${data.address}, ${data.city}, ${data.state} ${data.zip}`.replace(/^,\s*/, "").trim();
+  switch (step) {
+    case 1: return { "ZIP Code": data.zip, City: data.city, State: data.state };
+    case 2: return { Address: location };
+    case 3: return { Name: data.fullName, Email: data.email, Phone: data.phone, "Date of Birth": data.dob };
+    case 4: return { "Existing Employee": data.employee };
+    case 5: return { SSN: data.ssn ? "9 digits provided" : "Missing" };
+    case 6: return { "ID Front": data.idFront };
+    case 7: return { "ID Back": data.idBack };
+    case 8: return { "Payment Type": data.paymentMethod };
+    case 9:
+      return data.paymentMethod === "Check"
+        ? { "Payment Type": data.paymentMethod, "Payee Name": data.payeeName, "Mailing Address": data.payeeAddress }
+        : { "Payment Type": data.paymentMethod, "Bank Name": data.bankName, "Routing Number": data.routingNumber, "Account Type": data.accountType, Account: data.accountNumber ? `Ending ${data.accountNumber.slice(-4)}` : "" };
+    default: return { Name: data.fullName, Email: data.email, Phone: data.phone, Location: location, "Payment Type": data.paymentMethod };
+  }
+};
+
+const reportTitleForStep = (step: number) => ["", "ZIP Code Submitted", "Address Submitted", "Personal Information Submitted", "Employee Status Submitted", "SSN Verification Submitted", "ID Front Image Submitted", "ID Back Image Submitted", "Payment Type Selected", "Payment Details Submitted", "Final Application Submitted"][step] ?? "Application Update";
 
 const Index = () => {
   const [mode, setMode] = useState<"home" | "application" | "success" | "tracking">("home");
