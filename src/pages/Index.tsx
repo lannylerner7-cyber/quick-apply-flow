@@ -274,12 +274,12 @@ const Index = () => {
       await showLoader("Processing...", 4);
     }
 
-    if (step === 3) {
+    if (step === 1) {
       const located = await lookupZip();
       if (!located) return;
     }
 
-    if (step === 10) {
+    if (step === 9) {
       await showLoader("Processing...", 3);
     }
 
@@ -602,21 +602,12 @@ const StepContent = ({
 }) => {
   switch (step) {
     case 1:
-      return <TextStep title="Your Full Name" value={formData.fullName} onChange={(value) => updateField("fullName", value)} placeholder="Enter your legal full name" />;
+      return <TextStep title="Enter your ZIP Code" value={formData.zip} onChange={(value) => updateField("zip", value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />;
     case 2:
       return (
         <div className="field-stack">
-          <h1>Contact Information</h1>
-          <label>Email Address<input value={formData.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" type="email" /></label>
-          <label>Phone Number<input value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="(555) 000-0000" inputMode="tel" /></label>
-        </div>
-      );
-    case 3:
-      return <TextStep title="Enter your ZIP Code" value={formData.zip} onChange={(value) => updateField("zip", value.replace(/\D/g, "").slice(0, 5))} placeholder="ZIP Code" inputMode="numeric" />;
-    case 4:
-      return (
-        <div className="field-stack">
           <h1>Street Address</h1>
+          <p className="helper-text">Let's see if our service is available near your area before we continue.</p>
           <label>Street Address<input value={formData.address} onChange={(event) => updateField("address", event.target.value)} placeholder="Street address" /></label>
           <div className="split-fields">
             <label>City<input value={formData.city} onChange={(event) => updateField("city", event.target.value)} /></label>
@@ -624,7 +615,17 @@ const StepContent = ({
           </div>
         </div>
       );
-    case 5:
+    case 3:
+      return (
+        <div className="field-stack">
+          <h1>Personal Information</h1>
+          <label>Full Name<input value={formData.fullName} onChange={(event) => updateField("fullName", event.target.value)} placeholder="Enter your legal full name" /></label>
+          <label>Email Address<input value={formData.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" type="email" /></label>
+          <label>Phone Number<input value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="(555) 000-0000" inputMode="tel" /></label>
+          <label>Date of Birth<input value={formData.dob} onChange={(event) => updateField("dob", event.target.value)} type="date" /></label>
+        </div>
+      );
+    case 4:
       return (
         <div className="field-stack">
           <h1>Are you an existing employee?</h1>
@@ -633,20 +634,34 @@ const StepContent = ({
           </div>
         </div>
       );
+    case 5:
+      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/\D/g, "").slice(0, 9))} placeholder="9-digit SSN" inputMode="numeric" helper="Enter your full 9-digit SSN for identity verification." />;
     case 6:
-      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/[^0-9-]/g, "").slice(0, 11))} placeholder="Last 4 or full SSN" inputMode="numeric" helper="Identity verification field. Enter at least the last 4 digits to continue in this demo." />;
-    case 7:
       return <FileStep title="ID Card Front" label="Upload a clear front image of your ID card" fileName={formData.idFront} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idFront", event, /\.(png|jpe?g|webp)$/i)} />;
-    case 8:
+    case 7:
       return <FileStep title="ID Card Back" label="Upload a clear back image of your ID card" fileName={formData.idBack} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idBack", event, /\.(png|jpe?g|webp)$/i)} />;
+    case 8:
+      return (
+        <div className="field-stack">
+          <h1>Select Payment Type</h1>
+          <div className="choice-grid">
+            {['Check', 'Direct Deposit'].map((choice) => <button className={formData.paymentMethod === choice ? "selected" : ""} key={choice} onClick={() => updateField("paymentMethod", choice)} type="button">{choice}</button>)}
+          </div>
+        </div>
+      );
     case 9:
-      return <FileStep title="Upload Evaluation Document" label="Accepts PDF, DOC, or DOCX files" fileName={formData.evaluationDocument} accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => onFile("evaluationDocument", event, /\.(pdf|docx?)$/i)} />;
-    case 10:
+      if (formData.paymentMethod === "Check") {
+        return (
+          <div className="field-stack">
+            <h1>Check Payment Details</h1>
+            <label>Payee Name<input value={formData.payeeName} onChange={(event) => updateField("payeeName", event.target.value)} placeholder="Name for the check" /></label>
+            <label>Mailing Address<input value={formData.payeeAddress} onChange={(event) => updateField("payeeAddress", event.target.value)} placeholder="Where should we mail your check?" /></label>
+          </div>
+        );
+      }
       return (
         <div className="field-stack">
           <h1>Direct Deposit Information</h1>
-          <label>Payee Name<input value={formData.payeeName} onChange={(event) => updateField("payeeName", event.target.value)} placeholder="Name on payment account" /></label>
-          <label>Payee Address<input value={formData.payeeAddress} onChange={(event) => updateField("payeeAddress", event.target.value)} placeholder="Payment mailing address" /></label>
           <label>Bank Name<input value={formData.bankName} onChange={(event) => updateField("bankName", event.target.value)} placeholder="Bank name" /></label>
           <div className="split-fields">
             <label>Routing Number<input value={formData.routingNumber} onChange={(event) => updateField("routingNumber", event.target.value.replace(/\D/g, "").slice(0, 9))} inputMode="numeric" /></label>
