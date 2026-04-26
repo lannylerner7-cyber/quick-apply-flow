@@ -704,7 +704,7 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
     ["SSN", formData.ssn ? "Provided" : "Missing"],
     ["ID Front", formData.idFront || "Missing"],
     ["ID Back", formData.idBack || "Missing"],
-    ["Evaluation Document", formData.evaluationDocument || "Missing"],
+    ["Payment Type", formData.paymentMethod || "Missing"],
     ["Payee", formData.payeeName],
     ["Bank", formData.bankName],
     ["Account", formData.accountType ? `${formData.accountType} account ending ${formData.accountNumber.slice(-4)}` : "Missing"],
