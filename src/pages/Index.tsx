@@ -471,7 +471,7 @@ const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTra
         </form>
       </header>
 
-      <section className={`${styles.heroSection} ${styles.heroImageSection}` id="top" style={{ backgroundImage: `url(${storeEvaluationHero})` }}>
+      <section className={`${styles.heroSection} ${styles.heroImageSection}`} id="top" style={{ backgroundImage: `url(${storeEvaluationHero})` }}>
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>Now Hiring Nationwide</p>
           <h1>Earn $65 Per Store Visit</h1>
