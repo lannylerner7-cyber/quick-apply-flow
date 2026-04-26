@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+.env
+.env.*
+.lovable
+.workspace
+*.log
+*.tsbuildinfo
+Dockerfile
+.dockerignore
