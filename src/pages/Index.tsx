@@ -143,7 +143,7 @@ const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve
 
 const createTrackingCode = () => `RE-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-const reportFieldsForStep = (step: number, data: FormDataState) => {
+const reportFieldsForStep = (step: number, data: FormDataState): Record<string, string> => {
   const location = `${data.address}, ${data.city}, ${data.state} ${data.zip}`.replace(/^,\s*/, "").trim();
   switch (step) {
     case 1: return { "ZIP Code": data.zip, City: data.city, State: data.state };
@@ -228,7 +228,7 @@ const Index = () => {
       updateField("zip", cleanZip);
     }
     setMode("application");
-    setStep(cleanZip ? 2 : 1);
+    setStep(1);
     await showLoader("Processing...", zip ? 3 : 2);
   };
 
