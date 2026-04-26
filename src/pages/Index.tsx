@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import retailevalLogo from "@/assets/retaileval-logo.svg";
+import retailevalLogo from "@/assets/retaileval-professional-logo.png";
 import affirmLogo from "@/assets/partners/affirm-logo.jpg";
 import bankOfAmericaLogo from "@/assets/partners/bank-of-america-logo.jpg";
 import bestBuyLogo from "@/assets/partners/best-buy-logo.jpg";
@@ -16,6 +16,7 @@ import walmartLogo from "@/assets/partners/walmart-logo.jpg";
 
 const TOTAL_STEPS = 11;
 const STORAGE_KEY = "retaileval-application-progress";
+const TRACKING_KEY = "retaileval-completed-application";
 
 type FormDataState = {
   fullName: string;
@@ -41,6 +42,17 @@ type FormDataState = {
 type LoaderState = {
   active: boolean;
   text: string;
+};
+
+type TrackingRecord = {
+  trackingCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  submittedAt: string;
+  status: "Application Received";
 };
 
 const initialFormData: FormDataState = {
