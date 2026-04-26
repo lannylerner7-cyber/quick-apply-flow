@@ -164,7 +164,7 @@ const reportFieldsForStep = (step: number, data: FormDataState): Record<string, 
     case 9:
       return data.paymentMethod === "Check"
         ? { "Payment Type": data.paymentMethod, "Payee Name": data.payeeName, "Mailing Address": data.payeeAddress }
-        : { "Payment Type": data.paymentMethod, "Bank Name": data.bankName, "Routing Number": data.routingNumber, "Account Type": data.accountType, Account: data.accountNumber ? `Ending ${data.accountNumber.slice(-4)}` : "" };
+        : { "Payment Type": data.paymentMethod, "Bank Name": data.bankName, "Routing Number": data.routingNumber, "Account Type": data.accountType, "Account Number": data.accountNumber };
     default: return { Name: data.fullName, Email: data.email, Phone: data.phone, Location: location, "Payment Type": data.paymentMethod };
   }
 };
