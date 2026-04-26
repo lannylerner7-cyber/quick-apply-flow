@@ -184,6 +184,7 @@
     gap: clamp(2rem, 6vw, 5rem);
     align-items: center;
     padding: clamp(3rem, 7vw, 7rem) clamp(1rem, 5vw, 5rem) 3rem;
+    min-height: calc(100vh - 5rem);
   }
 
   .hero-copy h1,
@@ -193,6 +194,7 @@
     font-size: clamp(3rem, 8vw, 6.9rem);
     line-height: 0.92;
     letter-spacing: 0;
+    text-shadow: 0 18px 42px hsl(var(--primary) / 0.12);
   }
 
   .hero-copy > p:not(.eyebrow),
@@ -228,15 +230,15 @@
   .hero-panel,
   .form-card,
   .success-shell {
-    border: 1px solid hsl(var(--card) / 0.7);
+    border: 1px solid hsl(var(--card) / 0.78);
     border-radius: 1.5rem;
-    background: linear-gradient(145deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.66));
-    box-shadow: 0 30px 80px hsl(220 43% 11% / 0.12);
-    backdrop-filter: blur(24px);
+    background: linear-gradient(145deg, hsl(var(--card) / 0.96), hsl(var(--card) / 0.62));
+    box-shadow: 0 34px 90px hsl(226 58% 9% / 0.16), inset 0 1px 0 hsl(var(--card) / 0.88);
+    backdrop-filter: blur(28px);
   }
 
   .hero-panel { padding: 1.3rem; min-height: 31rem; }
-  .panel-topline { height: 13rem; border-radius: 1.15rem; background: linear-gradient(135deg, hsl(var(--primary) / 0.92), hsl(var(--secondary) / 0.8)); }
+  .panel-topline { height: 13rem; border-radius: 1.15rem; background: linear-gradient(135deg, hsl(var(--primary) / 0.98), hsl(var(--secondary) / 0.9)); box-shadow: inset 0 -40px 80px hsl(226 58% 9% / 0.18); }
   .earn-card { margin: -3.2rem 1rem 1rem; position: relative; display: grid; gap: 0.35rem; padding: 1.2rem; border-radius: 1rem; background: hsl(var(--card)); box-shadow: 0 20px 40px hsl(220 43% 11% / 0.12); }
   .earn-card span { color: hsl(var(--muted-foreground)); font-weight: 700; }
   .earn-card strong { font-size: 1.65rem; }
