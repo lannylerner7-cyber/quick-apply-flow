@@ -363,7 +363,7 @@ const LoadingOverlay = ({ text }: { text: string }) => (
   </div>
 );
 
-const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
+const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack: () => void }) => {
   const [zip, setZip] = useState("");
 
   const submitZip = (event: FormEvent) => {
@@ -380,7 +380,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
         </a>
         <nav aria-label="Primary navigation">
           <a href="#top">Home</a>
-          <button onClick={() => onStart()} type="button">Track Application</button>
+          <button onClick={onTrack} type="button">Track Application</button>
         </nav>
         <form className="nav-zip" onSubmit={submitZip}>
           <input value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="Enter ZIP Code" inputMode="numeric" />
@@ -400,7 +400,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
               <button className="primary-button" type="submit">Get Started</button>
             </div>
           </form>
-          <button className="secondary-button" onClick={() => onStart()} type="button">Track Application</button>
+          <button className="secondary-button" onClick={onTrack} type="button">Track Application</button>
         </div>
         <div className="hero-panel" aria-label="RetailEval application preview">
           <div className="panel-topline" />
@@ -478,7 +478,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
         ))}
       </section>
 
-      <Footer onStart={onStart} />
+      <Footer onStart={onStart} onTrack={onTrack} />
     </>
   );
 };
