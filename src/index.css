@@ -239,6 +239,12 @@
   }
 
   .hero-panel { padding: 1.3rem; min-height: 31rem; }
+  .store-visual-panel { position: relative; overflow: hidden; display: grid; align-content: end; gap: 1rem; padding: 1rem; }
+  .store-visual-panel > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); filter: saturate(1.08) contrast(1.02); }
+  .store-visual-panel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, hsl(226 58% 9% / 0.02), hsl(226 58% 9% / 0.72)); }
+  .store-visual-panel .earn-card,
+  .store-visual-panel .mini-grid { position: relative; z-index: 1; }
+  .store-visual-panel .mini-grid span { background: hsl(var(--card) / 0.86); backdrop-filter: blur(12px); }
   .panel-topline { height: 13rem; border-radius: 1.15rem; background: linear-gradient(135deg, hsl(var(--primary) / 0.98), hsl(var(--secondary) / 0.9)); box-shadow: inset 0 -40px 80px hsl(226 58% 9% / 0.18); }
   .earn-card { margin: -3.2rem 1rem 1rem; position: relative; display: grid; gap: 0.35rem; padding: 1.2rem; border-radius: 1rem; background: hsl(var(--card)); box-shadow: 0 20px 40px hsl(220 43% 11% / 0.12); }
   .earn-card span { color: hsl(var(--muted-foreground)); font-weight: 700; }
@@ -309,6 +315,11 @@
   .site-footer button { display: block; padding: 0.3rem 0; text-align: left; }
   .footer-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .footer-badges span { border-radius: 999px; background: hsl(var(--muted)); padding: 0.45rem 0.7rem; font-size: 0.85rem; font-weight: 800; }
+  .footer-trust-badges { display: grid; gap: 0.75rem; }
+  .footer-trust-badges article { display: grid; grid-template-columns: 4.8rem 1fr; gap: 0.15rem 0.75rem; align-items: center; border: 1px solid hsl(var(--border)); border-radius: 1rem; background: hsl(var(--card) / 0.84); padding: 0.7rem; box-shadow: 0 14px 35px hsl(220 43% 11% / 0.07); }
+  .footer-trust-badges img { grid-row: span 2; width: 4.8rem; height: 2.65rem; object-fit: contain; border-radius: 0.55rem; background: hsl(var(--card)); }
+  .footer-trust-badges strong { line-height: 1.1; }
+  .footer-trust-badges span { color: hsl(var(--muted-foreground)); font-size: 0.86rem; font-weight: 800; }
   .site-footer small { grid-column: 1 / -1; color: hsl(var(--muted-foreground)); }
 
   .application-shell { width: min(760px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 5rem; }
