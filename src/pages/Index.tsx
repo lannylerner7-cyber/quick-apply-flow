@@ -283,6 +283,18 @@ const Index = () => {
 
   const completeApplication = async () => {
     await showLoader("Submitting application...", 3);
+    const completed: TrackingRecord = {
+      trackingCode: createTrackingCode(),
+      fullName: formData.fullName.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      city: formData.city,
+      state: formData.state,
+      submittedAt: new Date().toISOString(),
+      status: "Application Received",
+    };
+    setTrackingRecord(completed);
+    localStorage.setItem(TRACKING_KEY, JSON.stringify(completed));
     localStorage.removeItem(STORAGE_KEY);
     setMode("success");
   };
@@ -301,12 +313,16 @@ const Index = () => {
   if (mode === "success") {
     return (
       <main className="retail-page success-page">
-        <section className="success-shell">
-          <div className="brand-mark">RE</div>
+        <section className="success-shell intense-panel">
+          <img className="success-logo" src={retailevalLogo} alt="RetailEval Logo" />
           <p className="eyebrow">Application status</p>
-          <h1>Application Received</h1>
-          <p>Your RetailEval application has been recorded for this browser session. A coordinator will review the details and contact you with next steps.</p>
-          <button className="primary-button" onClick={() => setMode("home")}>Return Home</button>
+          <h1>Application Submitted Successfully</h1>
+          <p>Your RetailEval application has been received. An application specialist will review your file and an interview coordinator may contact you by text message within 24-48 hours.</p>
+          {trackingRecord && <div className="tracking-code-card"><span>Tracking Code</span><strong>{trackingRecord.trackingCode}</strong></div>}
+          <div className="success-actions">
+            <button className="primary-button" onClick={() => setMode("tracking")}>Track Application</button>
+            <button className="secondary-button" onClick={() => setMode("home")}>Return Home</button>
+          </div>
         </section>
       </main>
     );
@@ -316,7 +332,9 @@ const Index = () => {
     <main className="retail-page">
       {loader.active && <LoadingOverlay text={loader.text} />}
       {mode === "home" ? (
-        <HomePage onStart={startApplication} />
+        <HomePage onStart={startApplication} onTrack={() => setMode("tracking")} />
+      ) : mode === "tracking" ? (
+        <TrackingPage record={trackingRecord} onHome={() => setMode("home")} />
       ) : (
         <ApplicationFlow
           completion={completion}
