@@ -498,6 +498,45 @@ const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string;
   </section>
 );
 
+const TrackingPage = ({ record, onHome }: { record: TrackingRecord | null; onHome: () => void }) => {
+  const [code, setCode] = useState("");
+  const normalized = code.trim().toUpperCase();
+  const matched = record && normalized === record.trackingCode;
+
+  return (
+    <section className="tracking-shell">
+      <button className="text-button" onClick={onHome} type="button">Back to RetailEval</button>
+      <div className="tracking-panel intense-panel">
+        <img className="success-logo" src={retailevalLogo} alt="RetailEval Logo" />
+        <p className="eyebrow">Track Application</p>
+        <h1>Check your application status</h1>
+        <p>Enter the tracking code shown after submission. Tracking is stored securely in this browser session without a database.</p>
+        <div className="tracking-search">
+          <input value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="RE-2026-ABC123" />
+        </div>
+        {matched ? (
+          <div className="status-card">
+            <span className="status-pill">{record.status}</span>
+            <h2>{record.trackingCode}</h2>
+            <dl>
+              <div><dt>Applicant</dt><dd>{record.fullName}</dd></div>
+              <div><dt>Email</dt><dd>{record.email}</dd></div>
+              <div><dt>Location</dt><dd>{record.city}, {record.state}</dd></div>
+              <div><dt>Submitted</dt><dd>{new Date(record.submittedAt).toLocaleString()}</dd></div>
+            </dl>
+            <p>An application expert is reviewing your file. If your profile matches current store evaluation openings, an interview coordinator may send you a text message within 24-48 hours.</p>
+          </div>
+        ) : (
+          <div className="status-card muted-status">
+            <span className="status-pill">Awaiting code</span>
+            <p>{record ? "Enter your exact tracking code to view the current status." : "No completed application is saved in this browser yet. Submit an application first to generate a tracking code."}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 const ApplicationFlow = ({
   completion,
   error,
