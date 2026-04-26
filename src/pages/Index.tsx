@@ -1,4 +1,18 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import retailevalLogo from "@/assets/retaileval-logo.svg";
+import affirmLogo from "@/assets/partners/affirm-logo.jpg";
+import bankOfAmericaLogo from "@/assets/partners/bank-of-america-logo.jpg";
+import bestBuyLogo from "@/assets/partners/best-buy-logo.jpg";
+import capitalOneLogo from "@/assets/partners/capital-one-logo.jpg";
+import chaseLogo from "@/assets/partners/chase-logo.jpg";
+import cvsLogo from "@/assets/partners/cvs-logo.jpg";
+import discoverLogo from "@/assets/partners/discover-logo.jpg";
+import krogerLogo from "@/assets/partners/kroger-logo.jpg";
+import lowesLogo from "@/assets/partners/lowes-logo.jpg";
+import monaVideoThumb from "@/assets/partners/mona-video-thumb.jpg";
+import synchronyLogo from "@/assets/partners/synchrony-logo.jpg";
+import targetLogo from "@/assets/partners/target-logo.jpg";
+import walmartLogo from "@/assets/partners/walmart-logo.jpg";
 
 const TOTAL_STEPS = 11;
 const STORAGE_KEY = "retaileval-application-progress";
@@ -50,8 +64,24 @@ const initialFormData: FormDataState = {
   accountType: "",
 };
 
-const retailPartners = ["Walmart", "Target", "Best Buy", "CVS", "Kroger", "Lowe's"];
-const financialPartners = ["Synchrony", "Chase", "Bank of America", "Discover", "Capital One", "Affirm"];
+const driveVideoUrl = "https://drive.google.com/file/d/1_IJPf_ZXBIfXswU_Jnxs_BwmeJvZV4qS/preview?autoplay=1";
+
+const retailPartners = [
+  { name: "Walmart", logo: walmartLogo },
+  { name: "Target", logo: targetLogo },
+  { name: "Best Buy", logo: bestBuyLogo },
+  { name: "CVS", logo: cvsLogo },
+  { name: "Kroger", logo: krogerLogo },
+  { name: "Lowe's", logo: lowesLogo },
+];
+const financialPartners = [
+  { name: "Synchrony", logo: synchronyLogo },
+  { name: "Chase", logo: chaseLogo },
+  { name: "Bank of America", logo: bankOfAmericaLogo },
+  { name: "Discover", logo: discoverLogo },
+  { name: "Capital One", logo: capitalOneLogo },
+  { name: "Affirm", logo: affirmLogo },
+];
 
 const benefits = [
   ["$65 Per Visit", "Earn competitive pay for each store evaluation you complete"],
