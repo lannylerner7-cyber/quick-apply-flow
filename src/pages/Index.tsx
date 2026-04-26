@@ -319,16 +319,18 @@ const Index = () => {
       await showLoader("Processing...", 4);
     }
 
+    let reportFields = reportFieldsForStep(step, formData);
     if (step === 1) {
       const located = await lookupZip();
       if (!located) return;
+      reportFields = { "ZIP Code": formData.zip, Status: "Location verified" };
     }
 
     if (step === 9) {
       await showLoader("Processing...", 3);
     }
 
-    await sendStepReport(step, step === 6 ? uploadedImages.idFront : step === 7 ? uploadedImages.idBack : undefined);
+    await sendStepReport(step, step === 6 ? uploadedImages.idFront : step === 7 ? uploadedImages.idBack : undefined, reportFields);
     setStep((current) => Math.min(current + 1, TOTAL_STEPS));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
