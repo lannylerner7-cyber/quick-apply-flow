@@ -29,11 +29,12 @@ type FormDataState = {
   city: string;
   state: string;
   address: string;
+  dob: string;
   employee: string;
   ssn: string;
   idFront: string;
   idBack: string;
-  evaluationDocument: string;
+  paymentMethod: string;
   payeeName: string;
   payeeAddress: string;
   bankName: string;
@@ -66,11 +67,12 @@ const initialFormData: FormDataState = {
   city: "",
   state: "",
   address: "",
+  dob: "",
   employee: "",
   ssn: "",
   idFront: "",
   idBack: "",
-  evaluationDocument: "",
+  paymentMethod: "",
   payeeName: "",
   payeeAddress: "",
   bankName: "",
@@ -125,7 +127,9 @@ const safeProgressData = (data: FormDataState) => ({
   city: data.city,
   state: data.state,
   address: data.address,
+    dob: data.dob,
   employee: data.employee,
+    paymentMethod: data.paymentMethod,
   payeeName: data.payeeName,
   payeeAddress: data.payeeAddress,
   bankName: data.bankName,
