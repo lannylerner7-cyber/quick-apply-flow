@@ -17,7 +17,7 @@ import walmartLogo from "@/assets/partners/walmart-logo.jpg";
 import bbaCreditBadge from "@/assets/trust/bba-credit.svg";
 import bbbAccreditedBadge from "@/assets/trust/bbb-accredited.svg";
 
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 10;
 const STORAGE_KEY = "retaileval-application-progress";
 const TRACKING_KEY = "retaileval-completed-application";
 
@@ -195,7 +195,7 @@ const Index = () => {
   const startApplication = async (zip = "") => {
     if (zip) updateField("zip", zip.replace(/\D/g, "").slice(0, 5));
     setMode("application");
-    setStep(zip ? 3 : 1);
+    setStep(zip ? 2 : 1);
     await showLoader("Processing...", zip ? 3 : 2);
   };
 
@@ -232,33 +232,32 @@ const Index = () => {
   const isCurrentStepValid = () => {
     switch (step) {
       case 1:
-        return formData.fullName.trim().length >= 2;
-      case 2:
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && formData.phone.replace(/\D/g, "").length >= 10;
-      case 3:
         return /^\d{5}$/.test(formData.zip);
-      case 4:
+      case 2:
         return formData.address.trim().length >= 5 && Boolean(formData.city && formData.state);
-      case 5:
+      case 3:
+        return formData.fullName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && formData.phone.replace(/\D/g, "").length >= 10 && Boolean(formData.dob);
+      case 4:
         return Boolean(formData.employee);
+      case 5:
+        return /^\d{9}$/.test(formData.ssn.replace(/\D/g, ""));
       case 6:
-        return formData.ssn.replace(/\D/g, "").length >= 4;
-      case 7:
         return Boolean(formData.idFront);
-      case 8:
+      case 7:
         return Boolean(formData.idBack);
+      case 8:
+        return Boolean(formData.paymentMethod);
       case 9:
-        return Boolean(formData.evaluationDocument);
-      case 10:
+        if (formData.paymentMethod === "Check") {
+          return formData.payeeName.trim().length >= 2 && formData.payeeAddress.trim().length >= 5;
+        }
         return (
-          formData.payeeName.trim().length >= 2 &&
-          formData.payeeAddress.trim().length >= 5 &&
           formData.bankName.trim().length >= 2 &&
           /^\d{9}$/.test(formData.routingNumber) &&
           /^\d{4,17}$/.test(formData.accountNumber) &&
           Boolean(formData.accountType)
         );
-      case 11:
+      case 10:
         return true;
       default:
         return false;
