@@ -126,10 +126,13 @@ const safeProgressData = (data: FormDataState) => ({
 
 const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
+const createTrackingCode = () => `RE-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
 const Index = () => {
-  const [mode, setMode] = useState<"home" | "application" | "success">("home");
+  const [mode, setMode] = useState<"home" | "application" | "success" | "tracking">("home");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormDataState>(initialFormData);
+  const [trackingRecord, setTrackingRecord] = useState<TrackingRecord | null>(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState<LoaderState>({ active: false, text: "Processing..." });
 
@@ -145,6 +148,17 @@ const Index = () => {
       }
     } catch {
       localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedTracking = localStorage.getItem(TRACKING_KEY);
+    if (!savedTracking) return;
+
+    try {
+      setTrackingRecord(JSON.parse(savedTracking) as TrackingRecord);
+    } catch {
+      localStorage.removeItem(TRACKING_KEY);
     }
   }, []);
 
