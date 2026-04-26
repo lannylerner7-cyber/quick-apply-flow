@@ -331,7 +331,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
     <>
       <header className="site-header">
         <a className="logo-lockup" href="#top" aria-label="RetailEval home">
-          <span className="brand-mark">RE</span>
+          <img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" />
           <span>RetailEval</span>
         </a>
         <nav aria-label="Primary navigation">
@@ -365,7 +365,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
             <strong>50+ Major Retail Stores</strong>
           </div>
           <div className="mini-grid">
-            {retailPartners.slice(0, 4).map((partner) => <span key={partner}>{partner}</span>)}
+            {retailPartners.slice(0, 4).map((partner) => <span key={partner.name}>{partner.name}</span>)}
           </div>
         </div>
       </section>
@@ -411,8 +411,8 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
           <p>Watch this quick video to understand the evaluation process and what makes a great mystery shopper.</p>
         </div>
         <div className="video-panel">
-          <div className="play-button" aria-hidden="true" />
-          <span>Retail evaluation overview</span>
+          <img src={monaVideoThumb} alt="Retail evaluation training video preview" />
+          <iframe src={driveVideoUrl} title="Retail evaluation overview video" allow="autoplay; encrypted-media; fullscreen" allowFullScreen />
         </div>
       </section>
 
@@ -439,15 +439,15 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
   );
 };
 
-const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string; subtitle: string; items: string[]; compact?: boolean }) => (
+const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string; subtitle: string; items: { name: string; logo: string }[]; compact?: boolean }) => (
   <section className={`logo-cloud ${compact ? "compact" : ""}`}>
     <p>{title}</p>
     <h2>{subtitle}</h2>
     <div>
       {items.map((item) => (
-        <article key={item}>
-          <span>{item.slice(0, 2).toUpperCase()}</span>
-          <strong>{item}</strong>
+        <article key={item.name}>
+          <img src={item.logo} alt={`${item.name} logo`} loading="lazy" />
+          <strong>{item.name}</strong>
         </article>
       ))}
     </div>
