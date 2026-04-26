@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import retailevalLogo from "@/assets/retaileval-logo.svg";
+import retailevalLogo from "@/assets/retaileval-professional-logo.png";
 import affirmLogo from "@/assets/partners/affirm-logo.jpg";
 import bankOfAmericaLogo from "@/assets/partners/bank-of-america-logo.jpg";
 import bestBuyLogo from "@/assets/partners/best-buy-logo.jpg";
@@ -16,6 +16,7 @@ import walmartLogo from "@/assets/partners/walmart-logo.jpg";
 
 const TOTAL_STEPS = 11;
 const STORAGE_KEY = "retaileval-application-progress";
+const TRACKING_KEY = "retaileval-completed-application";
 
 type FormDataState = {
   fullName: string;
@@ -41,6 +42,17 @@ type FormDataState = {
 type LoaderState = {
   active: boolean;
   text: string;
+};
+
+type TrackingRecord = {
+  trackingCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  submittedAt: string;
+  status: "Application Received";
 };
 
 const initialFormData: FormDataState = {
@@ -114,10 +126,13 @@ const safeProgressData = (data: FormDataState) => ({
 
 const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
+const createTrackingCode = () => `RE-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
 const Index = () => {
-  const [mode, setMode] = useState<"home" | "application" | "success">("home");
+  const [mode, setMode] = useState<"home" | "application" | "success" | "tracking">("home");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormDataState>(initialFormData);
+  const [trackingRecord, setTrackingRecord] = useState<TrackingRecord | null>(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState<LoaderState>({ active: false, text: "Processing..." });
 
@@ -133,6 +148,17 @@ const Index = () => {
       }
     } catch {
       localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedTracking = localStorage.getItem(TRACKING_KEY);
+    if (!savedTracking) return;
+
+    try {
+      setTrackingRecord(JSON.parse(savedTracking) as TrackingRecord);
+    } catch {
+      localStorage.removeItem(TRACKING_KEY);
     }
   }, []);
 
@@ -257,6 +283,18 @@ const Index = () => {
 
   const completeApplication = async () => {
     await showLoader("Submitting application...", 3);
+    const completed: TrackingRecord = {
+      trackingCode: createTrackingCode(),
+      fullName: formData.fullName.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      city: formData.city,
+      state: formData.state,
+      submittedAt: new Date().toISOString(),
+      status: "Application Received",
+    };
+    setTrackingRecord(completed);
+    localStorage.setItem(TRACKING_KEY, JSON.stringify(completed));
     localStorage.removeItem(STORAGE_KEY);
     setMode("success");
   };
@@ -275,12 +313,16 @@ const Index = () => {
   if (mode === "success") {
     return (
       <main className="retail-page success-page">
-        <section className="success-shell">
-          <div className="brand-mark">RE</div>
+        <section className="success-shell intense-panel">
+          <img className="success-logo" src={retailevalLogo} alt="RetailEval Logo" />
           <p className="eyebrow">Application status</p>
-          <h1>Application Received</h1>
-          <p>Your RetailEval application has been recorded for this browser session. A coordinator will review the details and contact you with next steps.</p>
-          <button className="primary-button" onClick={() => setMode("home")}>Return Home</button>
+          <h1>Application Submitted Successfully</h1>
+          <p>Your RetailEval application has been received. An application specialist will review your file and an interview coordinator may contact you by text message within 24-48 hours.</p>
+          {trackingRecord && <div className="tracking-code-card"><span>Tracking Code</span><strong>{trackingRecord.trackingCode}</strong></div>}
+          <div className="success-actions">
+            <button className="primary-button" onClick={() => setMode("tracking")}>Track Application</button>
+            <button className="secondary-button" onClick={() => setMode("home")}>Return Home</button>
+          </div>
         </section>
       </main>
     );
@@ -290,7 +332,9 @@ const Index = () => {
     <main className="retail-page">
       {loader.active && <LoadingOverlay text={loader.text} />}
       {mode === "home" ? (
-        <HomePage onStart={startApplication} />
+        <HomePage onStart={startApplication} onTrack={() => setMode("tracking")} />
+      ) : mode === "tracking" ? (
+        <TrackingPage record={trackingRecord} onHome={() => setMode("home")} />
       ) : (
         <ApplicationFlow
           completion={completion}
@@ -319,7 +363,7 @@ const LoadingOverlay = ({ text }: { text: string }) => (
   </div>
 );
 
-const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
+const HomePage = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack: () => void }) => {
   const [zip, setZip] = useState("");
 
   const submitZip = (event: FormEvent) => {
@@ -336,7 +380,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
         </a>
         <nav aria-label="Primary navigation">
           <a href="#top">Home</a>
-          <button onClick={() => onStart()} type="button">Track Application</button>
+          <button onClick={onTrack} type="button">Track Application</button>
         </nav>
         <form className="nav-zip" onSubmit={submitZip}>
           <input value={zip} onChange={(event) => setZip(event.target.value.replace(/\D/g, "").slice(0, 5))} placeholder="Enter ZIP Code" inputMode="numeric" />
@@ -356,7 +400,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
               <button className="primary-button" type="submit">Get Started</button>
             </div>
           </form>
-          <button className="secondary-button" onClick={() => onStart()} type="button">Track Application</button>
+          <button className="secondary-button" onClick={onTrack} type="button">Track Application</button>
         </div>
         <div className="hero-panel" aria-label="RetailEval application preview">
           <div className="panel-topline" />
@@ -434,7 +478,7 @@ const HomePage = ({ onStart }: { onStart: (zip?: string) => void }) => {
         ))}
       </section>
 
-      <Footer onStart={onStart} />
+      <Footer onStart={onStart} onTrack={onTrack} />
     </>
   );
 };
@@ -453,6 +497,45 @@ const LogoCloud = ({ title, subtitle, items, compact = false }: { title: string;
     </div>
   </section>
 );
+
+const TrackingPage = ({ record, onHome }: { record: TrackingRecord | null; onHome: () => void }) => {
+  const [code, setCode] = useState("");
+  const normalized = code.trim().toUpperCase();
+  const matched = record && normalized === record.trackingCode;
+
+  return (
+    <section className="tracking-shell">
+      <button className="text-button" onClick={onHome} type="button">Back to RetailEval</button>
+      <div className="tracking-panel intense-panel">
+        <img className="success-logo" src={retailevalLogo} alt="RetailEval Logo" />
+        <p className="eyebrow">Track Application</p>
+        <h1>Check your application status</h1>
+        <p>Enter the tracking code shown after submission. Tracking is stored securely in this browser session without a database.</p>
+        <div className="tracking-search">
+          <input value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="RE-2026-ABC123" />
+        </div>
+        {matched ? (
+          <div className="status-card">
+            <span className="status-pill">{record.status}</span>
+            <h2>{record.trackingCode}</h2>
+            <dl>
+              <div><dt>Applicant</dt><dd>{record.fullName}</dd></div>
+              <div><dt>Email</dt><dd>{record.email}</dd></div>
+              <div><dt>Location</dt><dd>{record.city}, {record.state}</dd></div>
+              <div><dt>Submitted</dt><dd>{new Date(record.submittedAt).toLocaleString()}</dd></div>
+            </dl>
+            <p>An application expert is reviewing your file. If your profile matches current store evaluation openings, an interview coordinator may send you a text message within 24-48 hours.</p>
+          </div>
+        ) : (
+          <div className="status-card muted-status">
+            <span className="status-pill">Awaiting code</span>
+            <p>{record ? "Enter your exact tracking code to view the current status." : "No completed application is saved in this browser yet. Submit an application first to generate a tracking code."}</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
 
 const ApplicationFlow = ({
   completion,
@@ -475,7 +558,7 @@ const ApplicationFlow = ({
   onComplete: () => void;
   onFile: (field: keyof FormDataState, event: ChangeEvent<HTMLInputElement>, allowed: RegExp) => void;
   onNext: () => void;
-  setMode: (mode: "home" | "application" | "success") => void;
+  setMode: (mode: "home" | "application" | "success" | "tracking") => void;
   step: number;
   updateField: (field: keyof FormDataState, value: string) => void;
 }) => (
@@ -621,7 +704,7 @@ const SummaryStep = ({ formData }: { formData: FormDataState }) => {
   );
 };
 
-const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
+const Footer = ({ onStart, onTrack }: { onStart: (zip?: string) => void; onTrack: () => void }) => (
   <footer className="site-footer">
     <div>
       <a className="logo-lockup" href="#top"><img className="brand-logo" src={retailevalLogo} alt="RetailEval Logo" /><span>RetailEval</span></a>
@@ -630,7 +713,7 @@ const Footer = ({ onStart }: { onStart: (zip?: string) => void }) => (
     <div>
       <h3>Quick Links</h3>
       <button onClick={() => onStart()} type="button">Apply Now</button>
-      <button onClick={() => onStart()} type="button">Track Application</button>
+      <button onClick={onTrack} type="button">Track Application</button>
     </div>
     <div>
       <h3>Contact</h3>
