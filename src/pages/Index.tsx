@@ -143,6 +143,13 @@ const delay = (ms: number) => new Promise((resolve) => window.setTimeout(resolve
 
 const createTrackingCode = () => `RE-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
+const formatSsn = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+};
+
 const reportFieldsForStep = (step: number, data: FormDataState): Record<string, string> => {
   const location = `${data.address}, ${data.city}, ${data.state} ${data.zip}`.replace(/^,\s*/, "").trim();
   switch (step) {
@@ -691,7 +698,13 @@ const StepContent = ({
         </div>
       );
     case 5:
-      return <TextStep title="Social Security Number" value={formData.ssn} onChange={(value) => updateField("ssn", value.replace(/\D/g, "").slice(0, 9))} placeholder="9-digit SSN" inputMode="numeric" helper="Enter your full 9-digit SSN for identity verification." />;
+      return (
+        <div className="field-stack">
+          <h1>9-Digit Social Security Number</h1>
+          <input value={formData.ssn} onChange={(event) => updateField("ssn", formatSsn(event.target.value))} placeholder="000-00-0000" inputMode="numeric" maxLength={11} autoFocus />
+          <p className="helper-text">Enter the full 9-digit SSN in standard job application format.</p>
+        </div>
+      );
     case 6:
       return <FileStep title="ID Card Front" label="Upload a clear front image of your ID card" fileName={formData.idFront} accept="image/png,image/jpeg,image/webp" onChange={(event) => onFile("idFront", event, /\.(png|jpe?g|webp)$/i)} />;
     case 7:
